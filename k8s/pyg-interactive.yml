@@ -1,0 +1,36 @@
+# This pod is just an interactive one for poking around with torch-geometric interactively
+apiVersion: v1
+kind: Pod
+metadata:
+  name: interactive-torch-geometric
+spec:
+  securityContext:
+    runAsUser: 1001
+    runAsGroup: 3000
+    fsGroup: 2000
+  containers:
+  - name: pyg
+    image: nvcr.io/nvidia/pyg:24.05-py3
+    tty: true
+    command:
+    - "/bin/bash"
+    resources:
+      limits:
+        cpu: '2'
+#        memory: 170G
+        memory: 8G
+        ephemeral-storage: 2G
+        #GPU
+        nvidia.com/mig-1g.5gb: 1
+      requests:
+        cpu: '2'
+#        memory: 170G
+        memory: 8G
+        ephemeral-storage: 2G
+    volumeMounts:
+    - mountPath: "/workspace/data"
+      name: storage
+  volumes:
+  - name: storage
+    persistentVolumeClaim:
+      claimName: nn-geo-storage
