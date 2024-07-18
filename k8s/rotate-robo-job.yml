@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rotate-fkb
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 3000
+        fsGroup: 2000
+      containers:
+      - name: pyg
+        image: nvcr.io/nvidia/pyg:24.05-py3
+        tty: true
+        command: ["sh", "-c", "git clone http://github.com/cbizon/protoroborotor && cd protoroborotor && python src/run_rot.py --model=rotate"]
+        resources:
+          limits:
+            cpu: '2'
+    #        memory: 170G
+            memory: 8G
+            ephemeral-storage: 2G
+            #GPU
+            nvidia.com/mig-1g.5gb: 1
+          requests:
+            cpu: '2'
+    #        memory: 170G
+            memory: 8G
+            ephemeral-storage: 2G
+        volumeMounts:
+        - mountPath: "/workspace/data"
+          name: storage
+      volumes:
+      - name: storage
+        persistentVolumeClaim:
+          claimName: nn-geo-storage
+      restartPolicy: Never
