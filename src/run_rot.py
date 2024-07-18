@@ -23,7 +23,7 @@ parser.add_argument('--model', choices=model_map.keys(), type=str.lower,
 args = parser.parse_args()
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-path = osp.join(osp.dirname(osp.realpath(__file__)), '..',  'ROBOKOP', 'v1')
+path = osp.join(osp.dirname(osp.realpath(__file__)), '..',  'robokop', 'v1')
 
 train_data = ROBOKOP(path, split='train')[0].to(device)
 val_data = ROBOKOP(path, split='val')[0].to(device)

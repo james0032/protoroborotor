@@ -27,7 +27,7 @@ class ROBOKOP(InMemoryDataset):
 
     @property
     def raw_file_names(self) -> List[str]:
-        return ['train.txt', 'valid.txt', 'test.txt']
+        return ['robo_train.txt', 'robo_valid.txt', 'robo_test.txt']
 
     @property
     def processed_file_names(self) -> List[str]:
