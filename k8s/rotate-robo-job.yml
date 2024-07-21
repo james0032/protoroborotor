@@ -16,16 +16,14 @@ spec:
         command: ["sh", "-c", "cd /workspace/data && rm -rf protoroborotor && git clone http://github.com/cbizon/protoroborotor && cd protoroborotor && export PYTHONPATH=. && python src/run_rot.py --model=rotate"]
         resources:
           limits:
-            cpu: '2'
-    #        memory: 170G
-            memory: 8G
+            cpu: '1'
+            memory: 64G
             ephemeral-storage: 2G
             #GPU
             nvidia.com/mig-1g.5gb: 1
           requests:
-            cpu: '2'
-    #        memory: 170G
-            memory: 8G
+            cpu: '1'
+            memory: 64G
             ephemeral-storage: 2G
         volumeMounts:
         - mountPath: "/workspace/data"
