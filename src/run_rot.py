@@ -22,7 +22,9 @@ parser.add_argument('--model', choices=model_map.keys(), type=str.lower,
                     required=True)
 args = parser.parse_args()
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = 'cuda'
+print("CUDA?", torch.cuda.is_available())
+#device = 'cuda' if torch.cuda.is_available() else 'cpu'
 path = osp.join(osp.dirname(osp.realpath(__file__)), '..',  '..', 'robokop', 'v2')
 
 print(osp.realpath(__file__))
@@ -82,10 +84,10 @@ def test(data):
     )
 
 
-for epoch in range(1, 2):
+for epoch in range(1, 100):
     loss = train()
     print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
-    if epoch % 1 == 0:
+    if epoch % 25 == 0:
         rank, mrr, hits = test(val_data)
         print(f'Epoch: {epoch:03d}, Val Mean Rank: {rank:.2f}, '
               f'Val MRR: {mrr:.4f}, Val Hits@10: {hits:.4f}')
