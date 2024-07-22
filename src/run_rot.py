@@ -75,19 +75,21 @@ def train():
 @torch.no_grad()
 def test(data):
     model.eval()
+    print("Testing Model")
     return model.test(
         head_index=data.edge_index[0],
         rel_type=data.edge_type,
         tail_index=data.edge_index[1],
         batch_size=20000,
         k=10,
+        log=False
     )
 
 
-for epoch in range(1, 100):
+for epoch in range(1, 1000):
     loss = train()
     print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
-    if epoch % 25 == 0:
+    if epoch % 100 == 0:
         rank, mrr, hits = test(val_data)
         print(f'Epoch: {epoch:03d}, Val Mean Rank: {rank:.2f}, '
               f'Val MRR: {mrr:.4f}, Val Hits@10: {hits:.4f}')
