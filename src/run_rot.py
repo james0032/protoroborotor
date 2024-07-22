@@ -93,8 +93,7 @@ for epoch in range(1, 2):
         'epoch': epoch,
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
-        'loss': loss,
-        ...
+        'loss': loss
     }, f"{path}/model.pt")
 
 rank, mrr, hits_at_10 = test(test_data)
