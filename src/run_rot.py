@@ -94,13 +94,14 @@ for epoch in range(1, 1000):
         rank, mrr, hits = test(val_data)
         print(f'Epoch: {epoch:03d}, Val Mean Rank: {rank:.2f}, '
               f'Val MRR: {mrr:.4f}, Val Hits@10: {hits:.4f}')
-    print("Saving Model")
-    torch.save({
-        'epoch': epoch,
-        'model_state_dict': model.state_dict(),
-        'optimizer_state_dict': optimizer.state_dict(),
-        'loss': loss
-    }, f"{path}/model.pt")
+
+print("Saving Model")
+torch.save({
+    'epoch': epoch,
+    'model_state_dict': model.state_dict(),
+    'optimizer_state_dict': optimizer.state_dict(),
+    'loss': loss
+}, f"{path}/model.pt")
 
 print("One last test")
 rank, mrr, hits_at_10 = test(test_data)
