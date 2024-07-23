@@ -25,7 +25,8 @@ args = parser.parse_args()
 device = 'cuda'
 print("CUDA?", torch.cuda.is_available())
 #device = 'cuda' if torch.cuda.is_available() else 'cpu'
-path = osp.join(osp.dirname(osp.realpath(__file__)), '..',  '..', 'robokop', 'v2')
+#v1 is a full robokop baseline - subclass, with 80/20/20 split
+path = osp.join(osp.dirname(osp.realpath(__file__)), '..',  '..', 'robokop', 'v1')
 
 print(osp.realpath(__file__))
 print(path)
@@ -93,6 +94,7 @@ for epoch in range(1, 1000):
         rank, mrr, hits = test(val_data)
         print(f'Epoch: {epoch:03d}, Val Mean Rank: {rank:.2f}, '
               f'Val MRR: {mrr:.4f}, Val Hits@10: {hits:.4f}')
+    print("Saving Model")
     torch.save({
         'epoch': epoch,
         'model_state_dict': model.state_dict(),
@@ -100,6 +102,7 @@ for epoch in range(1, 1000):
         'loss': loss
     }, f"{path}/model.pt")
 
+print("One last test")
 rank, mrr, hits_at_10 = test(test_data)
 print(f'Test Mean Rank: {rank:.2f}, Test MRR: {mrr:.4f}, '
       f'Test Hits@10: {hits_at_10:.4f}')
