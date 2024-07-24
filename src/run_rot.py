@@ -10,6 +10,12 @@ from torch_geometric.nn import ComplEx, DistMult, RotatE, TransE
 
 from src.ROBOKOP_Data import ROBOKOP
 
+# read an argument from the command line, specifying the name of the dataset
+argparser = argparse.ArgumentParser()
+argparser.add_argument('--dataset', type=str, default='v1')
+args = argparser.parse_args()
+dataset = args.dataset
+
 model_map = {
     'transe': TransE,
     'complex': ComplEx,
@@ -26,7 +32,7 @@ device = 'cuda'
 print("CUDA?", torch.cuda.is_available())
 #device = 'cuda' if torch.cuda.is_available() else 'cpu'
 #v1 is a full robokop baseline - subclass, with 80/20/20 split
-path = osp.join(osp.dirname(osp.realpath(__file__)), '..',  '..', 'robokop', 'v1')
+path = osp.join(osp.dirname(osp.realpath(__file__)), '..',  '..', 'robokop', dataset)
 
 print(osp.realpath(__file__))
 print(path)
