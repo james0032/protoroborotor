@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: rotate-robokop-CGD
+  name: rotate-robokop-cgd
 spec:
   template:
     spec:
@@ -13,7 +13,7 @@ spec:
       - name: pyg
         image: nvcr.io/nvidia/pyg:24.05-py3
         tty: true
-        command: ["sh", "-c", "export PYTHONPATH=/workspace/data/cache && cd /workspace/data && rm -rf protoroborotor && git clone http://github.com/cbizon/protoroborotor && cd protoroborotor && export PYTHONPATH=. && python src/run_rot.py --dataset==CGD"]
+        command: ["sh", "-c", "export PYTHONPATH=/workspace/data/cache && cd /workspace/data && rm -rf protoroborotor && git clone http://github.com/cbizon/protoroborotor && cd protoroborotor && export PYTHONPATH=. && python src/run_rot.py --dataset=CGD --model=rotate"]
         resources:
           limits:
             cpu: '1'

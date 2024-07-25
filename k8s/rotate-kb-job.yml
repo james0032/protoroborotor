@@ -22,6 +22,8 @@ spec:
             ephemeral-storage: 2G
             #GPU
             nvidia.com/mig-1g.5gb: 1
+            # nvidia.com/mig-2g.10gb: 1
+            # nvidia.com/mig-3g.20gb: 1
           requests:
             cpu: '2'
     #        memory: 170G

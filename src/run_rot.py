@@ -19,8 +19,11 @@ model_map = {
 
 # read an argument from the command line, specifying the name of the dataset
 argparser = argparse.ArgumentParser()
-argparser.add_argument('--dataset', type=str, default='v1')
-argparser.add_argument('--model', choices=model_map.keys(), type=str.lower, required=True)
+argparser.add_argument('--dataset', type=str, required=True)
+argparser.add_argument('--model', choices=model_map.keys(), type=str.lower, default='rotate')
+argparser.add_argument('--epochs', type=int, default=1000)
+argparser.add_argument('--testrate', type=int, default=100)
+argparser.add_argument('--saverate', type=int, default=100)
 args = argparser.parse_args()
 
 device = 'cuda'
@@ -88,14 +91,14 @@ def test(data):
     )
 
 
-for epoch in range(1, 1000):
+for epoch in range(1, args.epochs):
     loss = train()
     print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
-    if epoch % 100 == 0:
+    if epoch % args.testrate == 0:
         rank, mrr, hits = test(val_data)
         print(f'Epoch: {epoch:03d}, Val Mean Rank: {rank:.2f}, '
               f'Val MRR: {mrr:.4f}, Val Hits@10: {hits:.4f}')
-    if epoch % 100 == 0:
+    if epoch % args.saverate == 0:
         print("Saving Model")
         torch.save({
             'epoch': epoch,
