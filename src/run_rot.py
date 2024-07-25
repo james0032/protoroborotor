@@ -23,11 +23,6 @@ model_map = {
     'rotate': RotatE,
 }
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--model', choices=model_map.keys(), type=str.lower,
-                    required=True)
-args = parser.parse_args()
-
 device = 'cuda'
 print("CUDA?", torch.cuda.is_available())
 #device = 'cuda' if torch.cuda.is_available() else 'cpu'
