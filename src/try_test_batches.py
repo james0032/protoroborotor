@@ -116,5 +116,5 @@ stuff = torch.load(f"{path}/model_100.pt")
 model.load_state_dict(stuff['model_state_dict'])
 
 # Now lets see how long it takes to run test?
-for trials in ( (100000, 10),):
+for trials in ( (500000, 10),):
     test(val_data, bs=trials[0], k=trials[1])
