@@ -3,7 +3,7 @@
 
 import random
 
-def make_splits(train_frac = 0.8, test_frac = 0.1, directory="original"):
+def make_splits(train_frac = 0.9, test_frac = 0.05, directory="original"):
     input_file= f"robokop/{directory}/rotorobo.txt"
     train_file= f"robokop/{directory}/robo_train.txt"
     test_file = f"robokop/{directory}/robo_test.txt"
@@ -22,6 +22,7 @@ def make_splits(train_frac = 0.8, test_frac = 0.1, directory="original"):
                             val_writer.write(line)
 
 if __name__ == "__main__":
+    make_splits(directory="CD")
     make_splits(directory="original")
     make_splits(directory="CGD")
     print("Files created.")
