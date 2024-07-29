@@ -22,7 +22,6 @@ model_map = {
 argparser = argparse.ArgumentParser()
 argparser.add_argument('--dataset', type=str, required=True)
 argparser.add_argument('--modelepoch', type=int, default=100)
-argparser.add_argument('--pcount', type=int, default=12)
 argparser.add_argument('--model', type=str, default="rotate")
 args = argparser.parse_args()
 
@@ -42,6 +41,8 @@ model = model_map[args.model](
     **model_arg_map.get(args.model, {}),
 ).to(device)
 
+pcount = train_data.num_edge_types
+
 stuff = torch.load(f"{path}/model_{args.modelepoch}.pt")
 model.load_state_dict(stuff['model_state_dict'])
 
@@ -58,7 +59,7 @@ def test(data):
         log=False
     )
 
-for s in range(args.pcount):
-    test_data = PredicateTestData(path, split=s, num_preds=args.pcount)[0].to(device)
+for s in range(pcount):
+    test_data = PredicateTestData(path, split=s, num_preds=pcount)[0].to(device)
     rank, mrr, hits_at_10 = test(test_data)
     print(f'Predicate: {s}   Test Mean Rank: {rank:.2f}, Test MRR: {mrr:.4f}, ' f'Test Hits@10: {hits_at_10:.4f}')
