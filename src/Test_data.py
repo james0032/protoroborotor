@@ -26,6 +26,7 @@ class PredicateTestData(InMemoryDataset):
         self.num_preds = num_preds
 
         #Find the right path for this predicate and load it.
+
         path = self.processed_paths[split]
         self.load(path)
 
