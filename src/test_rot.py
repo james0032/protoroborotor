@@ -60,6 +60,9 @@ def test(data):
     )
 
 for s in range(pcount):
-    test_data = PredicateTestData(path, split=s, num_preds=pcount)[0].to(device)
-    rank, mrr, hits_at_10 = test(test_data)
-    print(f'Predicate: {s}   Test Mean Rank: {rank:.2f}, Test MRR: {mrr:.4f}, ' f'Test Hits@10: {hits_at_10:.4f}')
+    try:
+        test_data = PredicateTestData(path, split=s, num_preds=pcount)[0].to(device)
+        rank, mrr, hits_at_10 = test(test_data)
+        print(f'Predicate: {s}   Test Mean Rank: {rank:.2f}, Test MRR: {mrr:.4f}, ' f'Test Hits@10: {hits_at_10:.4f}')
+    except:
+        print(f"No test edges for predicate:{s}")

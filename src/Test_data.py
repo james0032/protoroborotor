@@ -78,4 +78,5 @@ class PredicateTestData(InMemoryDataset):
 
         for path in self.processed_paths:
             pnum = path.split("/")[-1].split(".")[0]
-            self.save([data_list[pnum]], path)
+            if pnum in data_list:
+                self.save([data_list[pnum]], path)
