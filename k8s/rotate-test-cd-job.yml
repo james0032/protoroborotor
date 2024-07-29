@@ -13,7 +13,7 @@ spec:
       - name: pyg
         image: nvcr.io/nvidia/pyg:24.05-py3
         tty: true
-        command: ["sh", "-c", "export PYTHONPATH=/workspace/data/cache && cd /workspace/data && rm -rf protoroborotor && git clone http://github.com/cbizon/protoroborotor && cd protoroborotor && export PYTHONPATH=. && python src/try_test_batches.py"]
+        command: ["sh", "-c", "export TRANSFORMERS_CACHE=/workspace/data/cache && cd /workspace/data && rm -rf protoroborotor && git clone http://github.com/cbizon/protoroborotor && cd protoroborotor && export PYTHONPATH=. && python src/test_rot.py --dataset=CD --modelepoch=100"]
         resources:
           limits:
             cpu: '1'

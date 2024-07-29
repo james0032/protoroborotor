@@ -50,29 +50,30 @@ class PredicateTestData(InMemoryDataset):
         subgraphs = defaultdict(list)
         with open(path) as f:
             all_lines = [x.split('\t') for x in f.read().split('\n')[:-1]]
-            for line in all_lines:
-                subgraphs[line[2]].append(line)
 
-            for predicate,lines in subgraphs.items():
-                edge_index = torch.empty((2, len(lines)), dtype=torch.long)
-                edge_type = torch.empty(len(lines), dtype=torch.long)
-                for i, (src, rel, dst) in enumerate(lines):
-                    if src not in node_dict:
-                        node_dict[src] = len(node_dict)
-                    if dst not in node_dict:
-                        node_dict[dst] = len(node_dict)
-                    if rel not in rel_dict:
-                        rel_dict[rel] = len(rel_dict)
+        for line in all_lines:
+            subgraphs[line[1]].append(line)
 
-                    edge_index[0, i] = node_dict[src]
-                    edge_index[1, i] = node_dict[dst]
-                    edge_type[i] = rel_dict[rel]
+        for predicate,lines in subgraphs.items():
+            edge_index = torch.empty((2, len(lines)), dtype=torch.long)
+            edge_type = torch.empty(len(lines), dtype=torch.long)
+            for i, (src, rel, dst) in enumerate(lines):
+                if src not in node_dict:
+                    node_dict[src] = len(node_dict)
+                if dst not in node_dict:
+                    node_dict[dst] = len(node_dict)
+                if rel not in rel_dict:
+                    rel_dict[rel] = len(rel_dict)
 
-                data = Data(edge_index=edge_index, edge_type=edge_type)
-                # the predicate will be something like "predicate:7"
-                pnum = predicate.split(":")[1]
-                data.num_nodes = len(node_dict)
-                data_list[pnum]=data
+                edge_index[0, i] = node_dict[src]
+                edge_index[1, i] = node_dict[dst]
+                edge_type[i] = rel_dict[rel]
+
+            data = Data(edge_index=edge_index, edge_type=edge_type)
+            # the predicate will be something like "predicate:7"
+            pnum = predicate.split(":")[1]
+            data.num_nodes = len(node_dict)
+            data_list[pnum]=data
 
 
         for path in self.processed_paths:
