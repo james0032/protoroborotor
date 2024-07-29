@@ -20,20 +20,20 @@ class PredicateTestData(InMemoryDataset):
         pre_transform: Optional[Callable] = None,
         force_reload: bool = False,
     ) -> None:
+        self.num_preds = num_preds
+
         super().__init__(root, transform, pre_transform,
                          force_reload=force_reload)
 
-        self.num_preds = num_preds
 
         #Find the right path for this predicate and load it.
-
         path = self.processed_paths[split]
         self.load(path)
 
     @property
     def raw_file_names(self) -> List[str]:
         # All of the data for this is in the test file, we're going to split it out
-        return ['robo_test.txt']
+        return ['robo_test.txt' for i in range(self.num_preds)]
 
     @property
     def processed_file_names(self) -> List[str]:
@@ -71,10 +71,10 @@ class PredicateTestData(InMemoryDataset):
                 data = Data(edge_index=edge_index, edge_type=edge_type)
                 # the predicate will be something like "predicate:7"
                 pnum = predicate.split(":")[1]
+                data.num_nodes = len(node_dict)
                 data_list[pnum]=data
 
 
         for path in self.processed_paths:
-            data.num_nodes = len(node_dict)
             pnum = path.split("/")[-1].split(".")[0]
-            self.save(data_list[pnum], path)
+            self.save([data_list[pnum]], path)
