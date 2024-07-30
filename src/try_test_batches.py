@@ -24,7 +24,7 @@ model_map = {
 }
 
 
-args={"model":"rotate", "dataset" : "CGD"}
+args={"model":"rotate", "dataset" : "CD"}
 
 device = 'cuda'
 print("CUDA?", torch.cuda.is_available())
@@ -80,7 +80,6 @@ def localtest(
     hits_by_pred = defaultdict(list)
     print("here we go...")
     for i in arange:
-        print(i)
         h, r, t = head_index[i], rel_type[i], tail_index[i]
 
         scores = []
@@ -112,7 +111,7 @@ def localtest(
         )
         hits_p[etype] = int(
             torch.tensor(hits_by_pred[etype]).sum()
-        ) / len(hits_by_pred
+        ) / len(hits_by_pred[etype])
 
     return mean_rank, mrr, hits_at_k, mr_p, mrr_p, hits_p
 
@@ -129,7 +128,7 @@ def test(data, bs=20000, k=10):
         tail_index=data.edge_index[1],
         batch_size=bs,
         k=k,
-        log=True
+        log=False
     )
     end = dt.now()
     print(f"batchsize={bs} k={k} took {end-start}")
