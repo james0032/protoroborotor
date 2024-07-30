@@ -78,7 +78,7 @@ def localtest(
     mean_ranks_by_pred = defaultdict(list)
     reciprocal_ranks_by_pred = defaultdict(list)
     hits_by_pred = defaultdict(list)
-    counts = {}
+    counts = defaultdict(int)
     print("here we go...")
     for i in arange:
         h, r, t = head_index[i], rel_type[i], tail_index[i]
