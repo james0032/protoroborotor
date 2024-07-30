@@ -22,7 +22,8 @@ def make_splits(train_frac = 0.9, test_frac = 0.05, directory="original"):
                             val_writer.write(line)
 
 if __name__ == "__main__":
-    make_splits(directory="CD")
-    make_splits(directory="original")
-    make_splits(directory="CGD")
+    make_splits(directory="CDD")
+    #make_splits(directory="CD")
+    #make_splits(directory="original")
+    #make_splits(directory="CGD")
     print("Files created.")

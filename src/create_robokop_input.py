@@ -12,15 +12,9 @@ def remove_subclass_and_cid(edge, typemap):
         return True
     return False
 
-def keep_CD(edge, typemap):
-    # return True if you want to filter this edge out
-    # We want to keep edges between chemicals and genes, between genes and disease, and between chemicals and diseases
-    # Unfortunately this means that we need a type map... Dangit
-    if edge["predicate"] == "biolink:subclass_of":
-        return True
+def check_accepted(edge, typemap, accepted):
     subj = edge["subject"]
     obj = edge["object"]
-    accepted = [ ("biolink:ChemicalEntity", "biolink:DiseaseOrPhenotypicFeature") ]
     subj_types = typemap.get(subj, set())
     obj_types = typemap.get(obj, set())
     for acc in accepted:
@@ -29,6 +23,15 @@ def keep_CD(edge, typemap):
         if acc[1] in subj_types and acc[0] in obj_types:
             return False
     return True
+
+def keep_CD(edge, typemap):
+    # return True if you want to filter this edge out
+    # We want to keep edges between chemicals and genes, between genes and disease, and between chemicals and diseases
+    # Unfortunately this means that we need a type map... Dangit
+    if edge["predicate"] == "biolink:subclass_of":
+        return True
+    accepted = [ ("biolink:ChemicalEntity", "biolink:DiseaseOrPhenotypicFeature") ]
+    return check_accepted(edge, typemap, accepted)
 
 
 def keep_CGD(edge, typemap):
@@ -37,19 +40,21 @@ def keep_CGD(edge, typemap):
     # Unfortunately this means that we need a type map... Dangit
     if edge["predicate"] == "biolink:subclass_of":
         return True
-    subj = edge["subject"]
-    obj = edge["object"]
     accepted = [("biolink:ChemicalEntity", "biolink:Gene"),
                 ("biolink:ChemicalEntity", "biolink:DiseaseOrPhenotypicFeature"),
                 ("biolink:Gene", "biolink:DiseaseOrPhenotypicFeature")]
-    subj_types = typemap.get(subj, set())
-    obj_types = typemap.get(obj, set())
-    for acc in accepted:
-        if acc[0] in subj_types and acc[1] in obj_types:
-            return False
-        if acc[1] in subj_types and acc[0] in obj_types:
-            return False
-    return True
+    return check_accepted(edge, typemap, accepted)
+
+
+def keep_CDD(edge, typemap):
+    # return True if you want to filter this edge out
+    # We want to keep edges between chemicals and genes, between genes and disease, and between chemicals and diseases
+    # Unfortunately this means that we need a type map... Dangit
+    if edge["predicate"] == "biolink:subclass_of":
+        return True
+    accepted = [ ("biolink:ChemicalEntity", "biolink:DiseaseOrPhenotypicFeature"),
+                ("biolink:DiseaseOrPhenotypicFeature", "biolink:DiseaseOrPhenotypicFeature")]
+    return check_accepted(edge, typemap, accepted)
 
 def pred_trans(edge, edge_map):
     edge_key = {"predicate": edge["predicate"]}
@@ -87,6 +92,10 @@ def create_robokop_input(node_file="robokop/nodes.jsonl", edges_file="robokop/ed
         # No subclasses
         # only chemical/disease edges
         remove_edge = keep_CD
+    elif style == "CDD":
+        # No subclasses
+        # only chemical/disease edges and disease/disease edges
+        remove_edge = keep_CDD
     else:
         print("I don't know what you mean")
         return
@@ -106,8 +115,10 @@ def create_robokop_input(node_file="robokop/nodes.jsonl", edges_file="robokop/ed
     dump_edge_map(edge_map,outdir)
 
 if __name__ == "__main__":
-    create_robokop_input(style="CD")
-    print("CD created.")
+    create_robokop_input(style="CDD")
+    print("CDD created.")
+    #create_robokop_input(style="CD")
+    #print("CD created.")
     #create_robokop_input(style="CGD")
     #print("CGD created.")
     #create_robokop_input(style="original")

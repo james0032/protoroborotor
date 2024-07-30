@@ -14,6 +14,8 @@ from src.ROBOKOP_Data import ROBOKOP
 from typing import Tuple
 from tqdm import tqdm
 
+from collections import defaultdict
+
 model_map = {
     'transe': TransE,
     'complex': ComplEx,
@@ -73,6 +75,9 @@ def localtest(
     arange = tqdm(arange) if log else arange
 
     mean_ranks, reciprocal_ranks, hits_at_k = [], [], []
+    mean_ranks_by_pred = defaultdict(list)
+    reciprocal_ranks_by_pred = defaultdict(list)
+    hits_by_pred = defaultdict(list)
     print("here we go...")
     for i in arange:
         print(i)
@@ -87,12 +92,29 @@ def localtest(
         mean_ranks.append(rank)
         reciprocal_ranks.append(1 / (rank + 1))
         hits_at_k.append(rank < k)
+        etype = r.item()
+        mean_ranks_by_pred[etype].append(rank)
+        reciprocal_ranks_by_pred[etype].append(1 / (rank + 1))
+        hits_by_pred[etype].append(rank < k)
 
     mean_rank = float(torch.tensor(mean_ranks, dtype=torch.float).mean())
     mrr = float(torch.tensor(reciprocal_ranks, dtype=torch.float).mean())
     hits_at_k = int(torch.tensor(hits_at_k).sum()) / len(hits_at_k)
+    mr_p = {}
+    mrr_p = {}
+    hits_p = {}
+    for etype in mean_ranks_by_pred:
+        mr_p[etype] = float(
+            torch.tensor(mean_ranks_by_pred[etype], dtype=torch.float).mean()
+        )
+        mrr_p[etype] = float(
+            torch.tensor(reciprocal_ranks_by_pred[etype], dtype=torch.float).mean()
+        )
+        hits_p[etype] = int(
+            torch.tensor(hits_by_pred[etype]).sum()
+        ) / len(hits_by_pred
 
-    return mean_rank, mrr, hits_at_k
+    return mean_rank, mrr, hits_at_k, mr_p, mrr_p, hits_p
 
 from datetime import datetime as dt
 @torch.no_grad()
@@ -117,4 +139,7 @@ model.load_state_dict(stuff['model_state_dict'])
 
 # Now lets see how long it takes to run test?
 for trials in ( (20000, 10),):
-    test(val_data, bs=trials[0], k=trials[1])
+    mean_rank, mrr, hits_at_k, mr_p, mrr_p, hits_p = test(val_data, bs=trials[0], k=trials[1])
+    print(f"Mean Rank: {mean_rank}, MRR: {mrr}, Hits@10: {hits_at_k}")
+    for e in mr_p:
+        print(f"Predicate: {e}   Test Mean Rank: {mr_p[e]:.2f}, Test MRR: {mrr_p[e]:.4f}, Test Hits@10: {hits_p[e]:.4f}")

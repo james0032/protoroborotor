@@ -59,10 +59,14 @@ def test(data):
         log=False
     )
 
-for s in range(pcount):
-    try:
-        test_data = PredicateTestData(path, split=s, num_preds=pcount)[0].to(device)
-        rank, mrr, hits_at_10 = test(test_data)
-        print(f'Predicate: {s}   Test Mean Rank: {rank:.2f}, Test MRR: {mrr:.4f}, ' f'Test Hits@10: {hits_at_10:.4f}')
-    except:
-        print(f"No test edges for predicate:{s}")
+
+with open(f"{path}/results_{args.modelepoch}.txt", 'w') as f:
+    f.write("Predicate\tMean Rank\tMRR\tHits@10\n")
+    for s in range(pcount):
+        try:
+            test_data = PredicateTestData(path, split=s, num_preds=pcount)[0].to(device)
+            rank, mrr, hits_at_10 = test(test_data)
+            print(f'Predicate: {s}   Test Mean Rank: {rank:.2f}, Test MRR: {mrr:.4f}, ' f'Test Hits@10: {hits_at_10:.4f}')
+            f.write(f'{s}\t{rank:.2f}\t{mrr:.4f}\t{hits_at_10:.4f}\n')
+        except:
+            print(f"No test edges for predicate:{s}")
