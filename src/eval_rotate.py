@@ -3,7 +3,6 @@ import os.path as osp
 
 #torch and torch_geometric are already in the container where this is to run
 import torch
-import torch.optim as optim
 from torch import Tensor
 
 #from torch_geometric.datasets import FB15k_237
@@ -24,7 +23,11 @@ model_map = {
 }
 
 
-args={"model":"rotate", "dataset" : "CD"}
+argparser = argparse.ArgumentParser()
+argparser.add_argument('--dataset', type=str, required=True)
+argparser.add_argument('--modelepoch', type=int, default=100)
+argparser.add_argument('--model', type=str, default="rotate")
+args = argparser.parse_args()
 
 device = 'cuda'
 print("CUDA?", torch.cuda.is_available())
@@ -48,6 +51,7 @@ model = model_map[args['model']](
 ).to(device)
 
 
+## This is taken from pytorch geometric's  framework but modified to provide per-predicate results
 def localtest(
         model,
         head_index: Tensor,
@@ -55,7 +59,7 @@ def localtest(
         tail_index: Tensor,
         batch_size: int,
         k: int = 10,
-        log: bool = True,
+        log: bool = False,
 ) -> Tuple[float, float, float]:
     r"""Evaluates the model quality by computing Mean Rank, MRR and
     Hits@:math:`k` across all possible tail entities.
@@ -70,7 +74,6 @@ def localtest(
         log (bool, optional): If set to :obj:`False`, will not print a
             progress bar to the console. (default: :obj:`True`)
     """
-    print("HI")
     arange = range(head_index.numel())
     arange = tqdm(arange) if log else arange
 
@@ -117,12 +120,10 @@ def localtest(
 
     return mean_rank, mrr, hits_at_k, mr_p, mrr_p, hits_p, counts
 
-from datetime import datetime as dt
 @torch.no_grad()
 def test(data, bs=20000, k=10):
     model.eval()
     print("Testing Model")
-    start = dt.now()
     return localtest(
         model,
         head_index=data.edge_index[0],
@@ -132,15 +133,18 @@ def test(data, bs=20000, k=10):
         k=k,
         log=False
     )
-    end = dt.now()
-    print(f"batchsize={bs} k={k} took {end-start}")
 
-stuff = torch.load(f"{path}/model_100.pt")
+stuff = torch.load(f"{path}/model_{args.modelepoch}.pt")
 model.load_state_dict(stuff['model_state_dict'])
 
 # Now lets see how long it takes to run test?
-for trials in ( (20000, 10),):
-    mean_rank, mrr, hits_at_k, mr_p, mrr_p, hits_p, counts = test(val_data, bs=trials[0], k=trials[1])
+batchsize = 20000
+k = 10
+with open(f"{path}/results_{args.modelepoch}.txt", 'w') as f:
+    f.write("Predicate\tCounts\tMean Rank\tMRR\tHits@10\n")
+    mean_rank, mrr, hits_at_k, mr_p, mrr_p, hits_p, counts = test(test_data, bs=batchsize, k=k)
     print(f"Mean Rank: {mean_rank}, MRR: {mrr}, Hits@10: {hits_at_k}")
+    f.write(f"All\t{sum(counts.values())}\t{mean_rank}\t{mrr}\t{hits_at_k}\n")
     for e in mr_p:
         print(f"Predicate: {e} Counts: {counts[e]}  Test Mean Rank: {mr_p[e]:.2f}, Test MRR: {mrr_p[e]:.4f}, Test Hits@10: {hits_p[e]:.4f}")
+        f.write(f"{e}\t{counts[e]}\t{mr_p[e]:.2f}\t{mrr_p[e]:.4f}\t{hits_p[e]:.4f}\n")
