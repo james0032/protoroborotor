@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rotate-robokop-cgd
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 3000
+        fsGroup: 2000
+      containers:
+      - name: pyg
+        image: nvcr.io/nvidia/pyg:24.05-py3
+        tty: true
+        command: ["sh", "-c", "export PYTHONPATH=/workspace/data/cache && cd /workspace/data && rm -rf protoroborotor && git clone http://github.com/cbizon/protoroborotor && cd protoroborotor && export PYTHONPATH=. && python src/run_rot.py --dataset=CGD --model=rotate"]
+        resources:
+          limits:
+            cpu: '2'
+            memory: 8G
+            ephemeral-storage: 1G
+            #GPU
+            nvidia.com/mig-1g.5gb: 1
+          requests:
+            cpu: '2'
+            memory: 8G
+            ephemeral-storage: 1G
+        volumeMounts:
+        - mountPath: "/workspace/data"
+          name: storage
+      volumes:
+      - name: storage
+        persistentVolumeClaim:
+          claimName: nn-geo-storage
+      restartPolicy: Never
