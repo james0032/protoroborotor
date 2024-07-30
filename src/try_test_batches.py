@@ -78,6 +78,7 @@ def localtest(
     mean_ranks_by_pred = defaultdict(list)
     reciprocal_ranks_by_pred = defaultdict(list)
     hits_by_pred = defaultdict(list)
+    counts = {}
     print("here we go...")
     for i in arange:
         h, r, t = head_index[i], rel_type[i], tail_index[i]
@@ -95,6 +96,7 @@ def localtest(
         mean_ranks_by_pred[etype].append(rank)
         reciprocal_ranks_by_pred[etype].append(1 / (rank + 1))
         hits_by_pred[etype].append(rank < k)
+        counts[etype] += 1
 
     mean_rank = float(torch.tensor(mean_ranks, dtype=torch.float).mean())
     mrr = float(torch.tensor(reciprocal_ranks, dtype=torch.float).mean())
@@ -113,7 +115,7 @@ def localtest(
             torch.tensor(hits_by_pred[etype]).sum()
         ) / len(hits_by_pred[etype])
 
-    return mean_rank, mrr, hits_at_k, mr_p, mrr_p, hits_p
+    return mean_rank, mrr, hits_at_k, mr_p, mrr_p, hits_p, counts
 
 from datetime import datetime as dt
 @torch.no_grad()
@@ -138,7 +140,7 @@ model.load_state_dict(stuff['model_state_dict'])
 
 # Now lets see how long it takes to run test?
 for trials in ( (20000, 10),):
-    mean_rank, mrr, hits_at_k, mr_p, mrr_p, hits_p = test(val_data, bs=trials[0], k=trials[1])
+    mean_rank, mrr, hits_at_k, mr_p, mrr_p, hits_p, counts = test(val_data, bs=trials[0], k=trials[1])
     print(f"Mean Rank: {mean_rank}, MRR: {mrr}, Hits@10: {hits_at_k}")
     for e in mr_p:
-        print(f"Predicate: {e}   Test Mean Rank: {mr_p[e]:.2f}, Test MRR: {mrr_p[e]:.4f}, Test Hits@10: {hits_p[e]:.4f}")
+        print(f"Predicate: {e} Counts: {counts[e]}  Test Mean Rank: {mr_p[e]:.2f}, Test MRR: {mrr_p[e]:.4f}, Test Hits@10: {hits_p[e]:.4f}")
