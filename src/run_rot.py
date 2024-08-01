@@ -43,8 +43,8 @@ train_data = ROBOKOP(path, split='train').to(device)
 val_data = ROBOKOP(path, split='val')[0].to(device)
 test_data = ROBOKOP(path, split='test').to(device)
 
-type(train_data)
-type(val_data)
+print(type(train_data))
+print(type(val_data))
 
 model_arg_map = {'rotate': {'margin': 9.0}}
 model = model_map[args.model](
