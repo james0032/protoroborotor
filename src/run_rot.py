@@ -36,15 +36,11 @@ print(osp.realpath(__file__))
 print(path)
 
 #I don't understand why these [0] are here
-#train_data = ROBOKOP(path, split='train')[0].to(device)
-#val_data = ROBOKOP(path, split='val')[0].to(device)
-#test_data = ROBOKOP(path, split='test')[0].to(device)
-train_data = ROBOKOP(path, split='train').to(device)
+# just looking at the types, without the 0 is a ROBOKOP but with the 0 it's a Data
+# So it looks like the whole thing is in memory if this is to believed
+train_data = ROBOKOP(path, split='train')[0].to(device)
 val_data = ROBOKOP(path, split='val')[0].to(device)
-test_data = ROBOKOP(path, split='test').to(device)
-
-print(type(train_data))
-print(type(val_data))
+test_data = ROBOKOP(path, split='test')[0].to(device)
 
 model_arg_map = {'rotate': {'margin': 9.0}}
 model = model_map[args.model](
