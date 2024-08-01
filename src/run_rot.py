@@ -35,9 +35,13 @@ path = osp.join(osp.dirname(osp.realpath(__file__)), '..',  '..', 'robokop', arg
 print(osp.realpath(__file__))
 print(path)
 
-train_data = ROBOKOP(path, split='train')[0].to(device)
-val_data = ROBOKOP(path, split='val')[0].to(device)
-test_data = ROBOKOP(path, split='test')[0].to(device)
+#I don't understand why these [0] are here
+#train_data = ROBOKOP(path, split='train')[0].to(device)
+#val_data = ROBOKOP(path, split='val')[0].to(device)
+#test_data = ROBOKOP(path, split='test')[0].to(device)
+train_data = ROBOKOP(path, split='train').to(device)
+val_data = ROBOKOP(path, split='val').to(device)
+test_data = ROBOKOP(path, split='test').to(device)
 
 model_arg_map = {'rotate': {'margin': 9.0}}
 model = model_map[args.model](
