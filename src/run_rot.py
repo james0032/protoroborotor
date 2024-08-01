@@ -97,10 +97,6 @@ def test(data):
 for epoch in range(1, args.epochs):
     loss = train()
     print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
-    if epoch % args.testrate == 0:
-        rank, mrr, hits = test(val_data)
-        print(f'Epoch: {epoch:03d}, Val Mean Rank: {rank:.2f}, '
-              f'Val MRR: {mrr:.4f}, Val Hits@10: {hits:.4f}')
     if epoch % args.saverate == 0:
         print("Saving Model")
         torch.save({
@@ -109,6 +105,10 @@ for epoch in range(1, args.epochs):
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': loss
         }, f"{path}/model_{epoch}.pt")
+    if epoch % args.testrate == 0:
+        rank, mrr, hits = test(val_data)
+        print(f'Epoch: {epoch:03d}, Val Mean Rank: {rank:.2f}, '
+              f'Val MRR: {mrr:.4f}, Val Hits@10: {hits:.4f}')
 
 print("One last test")
 rank, mrr, hits_at_10 = test(test_data)
