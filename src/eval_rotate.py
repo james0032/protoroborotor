@@ -131,7 +131,7 @@ def test(data, bs=20000, k=10):
         tail_index=data.edge_index[1],
         batch_size=bs,
         k=k,
-        log=False
+        log=True
     )
 
 stuff = torch.load(f"{path}/model_{args.modelepoch}.pt")
