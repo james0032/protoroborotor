@@ -17,7 +17,7 @@ model_map = {
     'rotate': RotatE,
 }
     
-def main():
+def main(args):
     device = 'cuda'
     print("CUDA?", torch.cuda.is_available())
     #device = 'cuda' if torch.cuda.is_available() else 'cpu'
