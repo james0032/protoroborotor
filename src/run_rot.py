@@ -49,15 +49,16 @@ model = model_map[args.model](
     hidden_channels=50,
     **model_arg_map.get(args.model, {}),
 ).to(device)
-
+print("Start data loader")
 loader = model.loader(
     head_index=train_data.edge_index[0],
     rel_type=train_data.edge_type,
     tail_index=train_data.edge_index[1],
     batch_size=1000,
     shuffle=True,
+    num_workers=8,
 )
-
+print("model loader done.")
 optimizer_map = {
     'transe': optim.Adam(model.parameters(), lr=0.01),
     'complex': optim.Adagrad(model.parameters(), lr=0.001, weight_decay=1e-6),
