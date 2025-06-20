@@ -76,7 +76,7 @@ def main(args):
                 f'Val MRR: {mrr:.4f}, Val Hits@10: {hits:.4f}')
 
     print("One last test")
-    rank, mrr, hits_at_10 = test(test_data)
+    rank, mrr, hits_at_10 = test(test_data, model)
     print(f'Test Mean Rank: {rank:.2f}, Test MRR: {mrr:.4f}, '
         f'Test Hits@10: {hits_at_10:.4f}')
 
