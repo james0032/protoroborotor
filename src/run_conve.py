@@ -6,17 +6,11 @@ import torch
 import torch.optim as optim
 import torch.multiprocessing as mp
 #from torch_geometric.datasets import FB15k_237
-from torch_geometric.nn import ComplEx, DistMult, RotatE, TransE
+
 
 from src.ROBOKOP_Data import ROBOKOP
+from src.models import ConvE
 
-model_map = {
-    'transe': TransE,
-    'complex': ComplEx,
-    'distmult': DistMult,
-    'rotate': RotatE,
-}
-    
 def main(args):
     device = 'cuda'
     print("CUDA?", torch.cuda.is_available())
@@ -35,7 +29,7 @@ def main(args):
     test_data = ROBOKOP(path, split='test')[0].to(device)
 
     model_arg_map = {'rotate': {'margin': 9.0}}
-    model = model_map[args.model](
+    model = ConvE(
         num_nodes=train_data.num_nodes,
         num_relations=train_data.num_edge_types,
         hidden_channels=50,
@@ -48,7 +42,6 @@ def main(args):
         tail_index=train_data.edge_index[1],
         batch_size=1000,
         shuffle=True,
-        num_workers=0,
     )
     print("model loader done.")
     optimizer_map = {
@@ -111,10 +104,10 @@ if __name__ == "__main__":
     # read an argument from the command line, specifying the name of the dataset
     argparser = argparse.ArgumentParser()
     argparser.add_argument('--dataset', type=str, required=True)
-    argparser.add_argument('--model', choices=model_map.keys(), type=str.lower, default='rotate')
-    argparser.add_argument('--epochs', type=int, default=1000)
-    argparser.add_argument('--testrate', type=int, default=100)
-    argparser.add_argument('--saverate', type=int, default=100)
+    #argparser.add_argument('--model', choices=model_map.keys(), type=str.lower, default='rotate')
+    argparser.add_argument('--epochs', type=int, default=500)
+    argparser.add_argument('--testrate', type=int, default=10)
+    argparser.add_argument('--saverate', type=int, default=10)
     args = argparser.parse_args()
-    mp.set_start_method('spawn', force=True)
+    #mp.set_start_method('spawn', force=True)
     main(args)
