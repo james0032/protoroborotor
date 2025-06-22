@@ -51,7 +51,7 @@ def main(args):
         'distmult': optim.Adam(model.parameters(), lr=0.0001, weight_decay=1e-6),
         'rotate': optim.Adam(model.parameters(), lr=1e-3),
     }
-    optimizer = optimizer_map[args.model]
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5) #optimizer_map[args.model]
 
     for epoch in range(1, args.epochs):
         loss = train(model, loader, optimizer)
