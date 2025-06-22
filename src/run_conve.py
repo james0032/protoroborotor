@@ -32,6 +32,7 @@ def main(args):
     model = ConvE(
         num_entities=train_data.num_nodes,
         num_relations=train_data.num_edge_types,
+        #embedding_dim=200, input_drop=0.2, hidden_drop=0.3, feature_map_drop=0.2
         #hidden_channels=50,
         #**model_arg_map.get(args.model, {}),
     ).to(device)

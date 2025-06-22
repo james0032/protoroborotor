@@ -6,7 +6,7 @@ from torch_geometric.data import Data
 from torch.utils.data import DataLoader, TensorDataset
 
 class ConvE(torch.nn.Module):
-    def __init__(self, num_entities, num_relations, embedding_dim, input_drop=0.2, hidden_drop=0.3, feature_map_drop=0.2):
+    def __init__(self, num_entities, num_relations, embedding_dim=200, input_drop=0.2, hidden_drop=0.3, feature_map_drop=0.2):
         super(ConvE, self).__init__()
         self.embedding_dim = embedding_dim
         self.emb_shape1 = 10  # must satisfy emb_shape1 * emb_shape2 = embedding_dim
