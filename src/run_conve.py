@@ -77,7 +77,10 @@ def main(args):
 def train(model, loader, optimizer):
     model.train()
     total_loss = total_examples = 0
-    for head_index, rel_type, tail_index in loader:
+    for batch in loader:
+        head_index=batch.edge_index[0],
+        rel_type=batch.edge_type,
+        tail_index=batch.edge_index[1],
         optimizer.zero_grad()
         loss = model.loss(head_index, rel_type, tail_index)
         loss.backward()
