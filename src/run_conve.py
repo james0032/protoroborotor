@@ -80,7 +80,9 @@ def train(model, loader, optimizer):
     for head_index, rel_type, tail_index in loader:
         optimizer.zero_grad()
         pred = model.forward(head_index, rel_type)
-        loss = model.loss(pred, tail_index)
+        target = torch.zeros_like(pred)  # shape: [B, num_entities]
+        target.scatter_(1, tail_index.view(-1, 1), 1.0)  # set 1 at true tail
+        loss = model.loss(pred, target)
         loss.backward()
         optimizer.step()
         #total_loss += float(loss) * head_index.numel()
