@@ -24,7 +24,7 @@ class ConvE(torch.nn.Module):
         self.bn1 = nn.BatchNorm2d(32)
         self.bn2 = nn.BatchNorm1d(embedding_dim)
 
-        self.fc = nn.Linear(32 * self.emb_shape1 * self.emb_shape2, embedding_dim)
+        self.fc = nn.Linear(32 * 2 * self.emb_shape1 * self.emb_shape2, embedding_dim)
 
         self.loss = nn.BCELoss()
         self.register_parameter('bias', nn.Parameter(torch.zeros(num_entities)))
