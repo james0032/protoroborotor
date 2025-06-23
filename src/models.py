@@ -60,7 +60,7 @@ class ConvE(torch.nn.Module):
         #dataset = TensorDataset(triples)
         #return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
         dataset = TripleDataset(head_index, rel_type, tail_index)
-        return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
+        return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, drop_last=True)
     
 class TripleDataset(Dataset):
     def __init__(self, head_index, rel_type, tail_index):
