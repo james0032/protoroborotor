@@ -51,7 +51,7 @@ def main(args):
         'distmult': optim.Adam(model.parameters(), lr=0.0001, weight_decay=1e-6),
         'rotate': optim.Adam(model.parameters(), lr=1e-3),
     }
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5) #optimizer_map[args.model]
+    optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5) #optimizer_map[args.model]
 
     for epoch in range(1, args.epochs):
         loss = train(model, loader, optimizer)
@@ -76,18 +76,16 @@ def main(args):
 
 def train(model, loader, optimizer):
     model.train()
-    total_loss = total_examples = 0
-    for batch in loader:
-        head_index=batch.edge_index[0],
-        rel_type=batch.edge_type,
-        tail_index=batch.edge_index[1],
+    #total_loss = total_examples = 0
+    for head_index, rel_type, tail_index in loader:
         optimizer.zero_grad()
-        loss = model.loss(head_index, rel_type, tail_index)
+        pred = model.forward(head_index, rel_type)
+        loss = model.loss(pred, tail_index)
         loss.backward()
         optimizer.step()
-        total_loss += float(loss) * head_index.numel()
-        total_examples += head_index.numel()
-    return total_loss / total_examples
+        #total_loss += float(loss) * head_index.numel()
+        #total_examples += head_index.numel()
+    return loss #total_loss / total_examples
 
 
 @torch.no_grad()

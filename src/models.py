@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.loader import LinkNeighborLoader
 from torch_geometric.data import Data
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader, Dataset, TensorDataset
 
 class ConvE(torch.nn.Module):
     def __init__(self, num_entities, num_relations, embedding_dim=200, input_drop=0.2, hidden_drop=0.3, feature_map_drop=0.2):
@@ -26,6 +26,7 @@ class ConvE(torch.nn.Module):
 
         self.fc = nn.Linear(32 * self.emb_shape1 * self.emb_shape2, embedding_dim)
 
+        self.loss = nn.BCELoss()
         self.register_parameter('bias', nn.Parameter(torch.zeros(num_entities)))
 
     def forward(self, head, relation):
@@ -54,7 +55,22 @@ class ConvE(torch.nn.Module):
         return pred
     
     def loader(self, head_index, rel_type, tail_index, batch_size=1024, shuffle=True):
-        """Mimics torch_geometric.nn.RotatE.loader behavior."""
-        triples = torch.stack([head_index, rel_type, tail_index], dim=1)
-        dataset = TensorDataset(triples)
+        #"""Mimics torch_geometric.nn.RotatE.loader behavior."""
+        #triples = torch.stack([head_index, rel_type, tail_index], dim=1)
+        #dataset = TensorDataset(triples)
+        #return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
+        dataset = TripleDataset(head_index, rel_type, tail_index)
         return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
+    
+class TripleDataset(Dataset):
+    def __init__(self, head_index, rel_type, tail_index):
+        assert len(head_index) == len(rel_type) == len(tail_index)
+        self.head = head_index
+        self.rel = rel_type
+        self.tail = tail_index
+
+    def __len__(self):
+        return len(self.head)
+
+    def __getitem__(self, idx):
+        return self.head[idx], self.rel[idx], self.tail[idx]
