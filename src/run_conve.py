@@ -43,7 +43,6 @@ def main(args):
         tail_index=train_data.edge_index[1],
         batch_size=1000,
         shuffle=True,
-        drop_last=True,
     )
     print("model loader done.")
     optimizer_map = {
