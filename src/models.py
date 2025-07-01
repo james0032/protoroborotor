@@ -98,7 +98,7 @@ class ConvE(torch.nn.Module):
             scores = []
             tail_indices = torch.arange(self.num_nodes, device=t.device)
             for ts in tail_indices.split(batch_size):
-                scores.append(self(h.expand_as(ts), r.expand_as(ts), ts))
+                scores.append(self(h.expand_as(ts), r.expand_as(ts)))
             rank = int((torch.cat(scores).argsort(
                 descending=True) == t).nonzero().view(-1))
             mean_ranks.append(rank)
