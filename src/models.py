@@ -14,7 +14,7 @@ class ConvE(torch.nn.Module):
         self.embedding_dim = embedding_dim
         self.emb_shape1 = 10  # must satisfy emb_shape1 * emb_shape2 = embedding_dim
         self.emb_shape2 = embedding_dim // self.emb_shape1
-
+        self.num_nodes = num_entities
         self.entity_embedding = nn.Embedding(num_entities, embedding_dim)
         self.relation_embedding = nn.Embedding(num_relations, embedding_dim)
 
