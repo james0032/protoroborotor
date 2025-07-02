@@ -8,7 +8,7 @@ import torch.multiprocessing as mp
 #from torch_geometric.datasets import FB15k_237
 from torch_geometric.data import Data
 from typing import List, Tuple
-
+from tqdm import tqdm
 from src.ROBOKOP_Data import ROBOKOP
 from src.models import ConvE
 
@@ -155,7 +155,7 @@ def evaluate_link_prediction(model, test_triples, all_triples, num_entities, dev
     with torch.no_grad():
         ranks = []
 
-        for head, relation, tail in test_triples:
+        for head, relation, tail in tqdm(test_triples, desc="Evaluating"):
             head_tensor = torch.LongTensor([head]).to(device)
             rel_tensor = torch.LongTensor([relation]).to(device)
 
