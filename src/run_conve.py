@@ -163,11 +163,11 @@ def evaluate_link_prediction(model, test_triples, all_triples, device='cuda', hi
             scores = model(head_tensor, rel_tensor).squeeze(0)  # (num_entities,)
 
             # Filter: remove all known (h, r, t') except the correct one
-            filt = set((head, relation, e) for e in range(len(all_triples))) - all_triples
+            filt = set((head, relation, e) for e in range(len(test_triples))) - all_triples
             filt.add((head, relation, tail))  # add the ground truth back
 
             # Create a mask for filtered indices
-            mask = torch.ones(len(all_triples), dtype=torch.bool).to(device)
+            mask = torch.ones(len(test_triples), dtype=torch.bool).to(device)
             for (_, _, t) in filt:
                 if t != tail:
                     mask[t] = 0
