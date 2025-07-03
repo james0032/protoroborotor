@@ -6,6 +6,7 @@ import torch
 
 from torch_geometric.data import Data, InMemoryDataset, download_url
 
+import os
 
 class ROBOKOP(InMemoryDataset):
     def __init__(
@@ -62,3 +63,13 @@ class ROBOKOP(InMemoryDataset):
         for data, path in zip(data_list, self.processed_paths):
             data.num_nodes = len(node_dict)
             self.save([data], path)
+            
+        # save node_dict and rel_dict for future use across different methods
+        processed_dir = os.path.dirname(path)
+        with open(os.path.join(processed_dir, "node_dict"), "w") as f:
+            for k, v in node_dict:
+                f.write(f"{k}\t{v}\n")
+        
+        with open(os.path.join(processed_dir, "rel_dict"), "w") as f:
+            for k, v in rel_dict:
+                f.write(f"{k}\t{v}\n")
