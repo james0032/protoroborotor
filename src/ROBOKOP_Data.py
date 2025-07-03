@@ -67,9 +67,9 @@ class ROBOKOP(InMemoryDataset):
         # save node_dict and rel_dict for future use across different methods
         processed_dir = os.path.dirname(path)
         with open(os.path.join(processed_dir, "node_dict"), "w") as f:
-            for k, v in node_dict:
+            for k, v in node_dict.items():
                 f.write(f"{k}\t{v}\n")
         
         with open(os.path.join(processed_dir, "rel_dict"), "w") as f:
-            for k, v in rel_dict:
+            for k, v in rel_dict.items():
                 f.write(f"{k}\t{v}\n")
