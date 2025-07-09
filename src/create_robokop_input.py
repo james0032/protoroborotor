@@ -90,6 +90,20 @@ def keep_CCGDD(edge, typemap):
                 ("biolink:Gene", "biolink:DiseaseOrPhenotypicFeature")]
     return check_accepted(edge, typemap, accepted)
 
+def keep_CCGGDD(edge, typemap):
+    # return True if you want to filter this edge out
+    # We want to keep edges between chemicals and genes, between genes and disease, and between chemicals and diseases
+    # Unfortunately this means that we need a type map... Dangit
+    if edge["predicate"] == "biolink:subclass_of":
+        return True
+    accepted = [ ("biolink:ChemicalEntity", "biolink:DiseaseOrPhenotypicFeature"),
+                ("biolink:ChemicalEntity", "biolink:ChemicalEntity"),
+                ("biolink:ChemicalEntity", "biolink:Gene"),
+                ("biolink:Gene", "biolink:Gene"),
+                ("biolink:DiseaseOrPhenotypicFeature", "biolink:DiseaseOrPhenotypicFeature"),
+                ("biolink:Gene", "biolink:DiseaseOrPhenotypicFeature")]
+    return check_accepted(edge, typemap, accepted)
+
 def keep_CGGD(edge, typemap):
     # return True if you want to filter this edge out
     # We want to keep edges between chemicals and genes, between genes and disease, and between chemicals and diseases
@@ -179,13 +193,15 @@ def create_robokop_input(node_file="robokop/nodes.jsonl", edges_file="robokop/ed
 
 if __name__ == "__main__":
     #create_robokop_input(style="CCGDD")
+    create_robokop_input(style="CCGGDD")
+    print("CCGGDD created.")
     #create_robokop_input(style="CGGD")
     #create_robokop_input(style="CCD")
     #print("CCD created.")
-    create_robokop_input(style="CD")
-    print("CD created.")
-    create_robokop_input(style="CCDD")
-    print("CCDD created.")
+    #create_robokop_input(style="CD")
+    #print("CD created.")
+    #create_robokop_input(style="CCDD")
+    #print("CCDD created.")
     #create_robokop_input(style="CGD")
     #print("CGD created.")
     #create_robokop_input(style="original")
