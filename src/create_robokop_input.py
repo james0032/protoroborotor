@@ -165,6 +165,10 @@ def create_robokop_input(node_file="robokop/nodes.jsonl", edges_file="robokop/ed
         # No subclasses
         # only chemical/disease edges and disease/disease edges
         remove_edge = keep_CCGDD
+    elif style == "CCGGDD":
+        # No subclasses
+        # only chemical/disease edges and disease/disease edges
+        remove_edge = keep_CCGGDD
     elif style == "CGGD":
         # No subclasses
         # only chemical/disease edges and disease/disease edges
