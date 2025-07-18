@@ -12,7 +12,7 @@ checkpoint_files = sorted([f for f in os.listdir(checkpoint_dir) if f.endswith("
 
 entities_file = "/workspace/data/robokop/CCGGDD/processed/node_dict"
 relations_file = "/workspace/data/robokop/CCGGDD/processed/rel_dict"
-train_file = "/workspace/data/robokop/CCGGDD/raw/rotorobo.txt"
+train_file = "/workspace/data/robokop/CCGGDD/raw/chebi8327only.txt"
 test_file = "/workspace/data/robokop/CCGGDD/raw/examplex.txt"
 
 output_file = "/workspace/data/robokop/CCGGDD/rotate_tracin/"
