@@ -54,6 +54,7 @@ with open(train_file) as f:
 
 # === Open output ===
 print("CUDA?", torch.cuda.is_available())
+device = 'cpu' # 'cuda' if torch.cuda.is_available() else 'cpu'
 print(checkpoint_files)
 for ckpt in tqdm(checkpoint_files):
     ckpt_path = os.path.join(checkpoint_dir, ckpt)
@@ -71,7 +72,7 @@ for ckpt in tqdm(checkpoint_files):
 
     # Check if CUDA is available, and move model to GPU if it is
     if torch.cuda.is_available():
-        model = model.cuda()
+        model = model.to(device)
 
     checkpoint = torch.load(ckpt_path)
     model.load_state_dict(checkpoint['model_state_dict'], strict=False) # Load only the model parameters 
@@ -85,11 +86,11 @@ for ckpt in tqdm(checkpoint_files):
 
             # Move tensor to GPU if CUDA is available
             if torch.cuda.is_available():
-                test_tensor = test_tensor.cuda()
+                test_tensor = test_tensor.to(device)
 
             # Convert to FloatTensor for forward propagation
-            float_test_tensor = test_tensor.float() 
-            float_test_tensor.requires_grad = True
+            float_test_tensor = test_tensor#.float() 
+            #float_test_tensor.requires_grad = True
 
             model.zero_grad()
             test_score = model(float_test_tensor)
@@ -109,11 +110,11 @@ for ckpt in tqdm(checkpoint_files):
 
                 # Move tensor to GPU if CUDA is available
                 if torch.cuda.is_available():
-                    train_tensor = train_tensor.cuda()
+                    train_tensor = train_tensor.to(device)
 
                 # Convert to FloatTensor for forward propagation
-                float_train_tensor = train_tensor.float() 
-                float_train_tensor.requires_grad = True
+                float_train_tensor = train_tensor#.float() 
+                #float_train_tensor.requires_grad = True
 
                 model.zero_grad()
                 train_score = model(float_train_tensor)
