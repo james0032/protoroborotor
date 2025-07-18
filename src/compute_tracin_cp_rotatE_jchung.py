@@ -1,6 +1,6 @@
 import torch
 import sys
-sys.path.append('/workspace/data/KnowledgeGraphEmbedding')
+sys.path.append('/workspace/data/KnowledgeGraphEmbedding/codes')
 from model import KGEModel
 import os
 from tqdm import tqdm
@@ -53,7 +53,7 @@ with open(train_file) as f:
         train_triples.append((h, r, t))
 
 # === Open output ===
-
+print("CUDA?", torch.cuda.is_available())
 print(checkpoint_files)
 for ckpt in tqdm(checkpoint_files):
     ckpt_path = os.path.join(checkpoint_dir, ckpt)
@@ -97,9 +97,10 @@ for ckpt in tqdm(checkpoint_files):
             test_loss.backward()
 
             test_grads = []
-            for p in model.parameters():
+            for p in tqdm(model.parameters()):
                 if p.grad is not None:
                     test_grads.append(p.grad.detach().clone().view(-1))
+            print(f"{len(test_grads)} parameters saved")
             test_grad_flat = torch.cat(test_grads)  # Flatten gradients for the test set
 
             for train in tqdm(train_triples):
