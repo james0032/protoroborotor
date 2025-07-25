@@ -24,6 +24,24 @@ def check_accepted(edge, typemap, accepted):
             return False
     return True
 
+def check_remove(edge, typemap, remove):
+    subj = edge["subject"]
+    obj = edge["object"]
+    subj_types = typemap.get(subj, set())
+    obj_types = typemap.get(obj, set())
+    for acc in remove:
+        if acc[0] in subj_types and acc[1] in obj_types:
+            return True
+        if acc[1] in subj_types and acc[0] in obj_types:
+            return True
+    return False
+
+def remove_CD(edge, typemap):
+    remove = [ ("biolink:ChemicalEntity", "biolink:DiseaseOrPhenotypicFeature"),
+               ("biolink:DiseaseOrPhenotypicFeature", "biolink:ChemicalEntity")
+              ]
+    return check_remove(edge, typemap, remove)
+
 def keep_CD(edge, typemap):
     # return True if you want to filter this edge out
     # We want to keep edges between chemicals and genes, between genes and disease, and between chemicals and diseases
@@ -119,10 +137,10 @@ def keep_CGGD(edge, typemap):
 
 def pred_trans(edge, edge_map):
     edge_key = {"predicate": edge["predicate"]}
-    edge_key["subject_aspect_qualifier"] = edge.get("subject_aspect_qualifier", "")
-    edge_key["object_aspect_qualifier"] = edge.get("object_aspect_qualifier", "")
-    edge_key["subject_direction_qualifier"] = edge.get("subject_direction_qualifier", "")
-    edge_key["object_direction_qualifier"] = edge.get("object_direction_qualifier", "")
+    #edge_key["subject_aspect_qualifier"] = edge.get("subject_aspect_qualifier", "")
+    #edge_key["object_aspect_qualifier"] = edge.get("object_aspect_qualifier", "")
+    #edge_key["subject_direction_qualifier"] = edge.get("subject_direction_qualifier", "")
+    #edge_key["object_direction_qualifier"] = edge.get("object_direction_qualifier", "")
     edge_key_string = json.dumps(edge_key, sort_keys=True)
     if edge_key_string not in edge_map:
         edge_map[edge_key_string] = f"predicate:{len(edge_map)}"
@@ -177,6 +195,8 @@ def create_robokop_input(node_file="robokop/nodes.jsonl", edges_file="robokop/ed
         # No subclasses
         # only chemical/disease edges and disease/disease edges
         remove_edge = keep_CCDD
+    elif style == "rCD":
+        remove_edge = remove_CD
     else:
         print("I don't know what you mean")
         return
@@ -197,8 +217,9 @@ def create_robokop_input(node_file="robokop/nodes.jsonl", edges_file="robokop/ed
 
 if __name__ == "__main__":
     #create_robokop_input(style="CCGDD")
-    create_robokop_input(style="CCGGDD")
-    print("CCGGDD created.")
+    #create_robokop_input(style="CCGGDD")
+    create_robokop_input(style="rCD")
+    print("subgraph keep all except drug to disease relationships created.")
     #create_robokop_input(style="CGGD")
     #create_robokop_input(style="CCD")
     #print("CCD created.")
