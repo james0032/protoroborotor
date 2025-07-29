@@ -23,7 +23,8 @@ def make_splits(train_frac = 0.9, test_frac = 0.05, directory="original"):
 
 if __name__ == "__main__":
     #make_splits(directory="CCGDD")
-    make_splits(directory="CCGGDD")
+    #make_splits(directory="CCGGDD")
+    make_splits(directory="rCD")
     #make_splits(directory="CGGD")
     #make_splits(directory="CCDD")
     #make_splits(directory="CD")
