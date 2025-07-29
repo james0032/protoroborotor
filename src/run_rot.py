@@ -10,6 +10,9 @@ from torch_geometric.nn import ComplEx, DistMult, RotatE, TransE
 
 from src.ROBOKOP_Data import ROBOKOP
 
+torch.set_num_threads(8)   # For intra-op parallelism
+torch.set_num_interop_threads(2)  # For inter-op (thread pool) parallelism
+
 model_map = {
     'transe': TransE,
     'complex': ComplEx,
@@ -39,7 +42,7 @@ def main(args):
         num_nodes=train_data.num_nodes,
         num_relations=train_data.num_edge_types,
         
-        hidden_channels=512,
+        hidden_channels=100,
         **model_arg_map.get(args.model, {}),
     ).to(device)
     print("Start data loader")
@@ -47,9 +50,9 @@ def main(args):
         head_index=train_data.edge_index[0],
         rel_type=train_data.edge_type,
         tail_index=train_data.edge_index[1],
-        batch_size=1000,
+        batch_size=10000,
         shuffle=True,
-        num_workers=0,
+        num_workers=8,
     )
     print("model loader done.")
     optimizer_map = {
