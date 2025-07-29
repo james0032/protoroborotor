@@ -52,14 +52,14 @@ def main(args):
         tail_index=train_data.edge_index[1],
         batch_size=10000,
         shuffle=True,
-        num_workers=8,
+        num_workers=0,
     )
     print("model loader done.")
     optimizer_map = {
         'transe': optim.Adam(model.parameters(), lr=0.01),
         'complex': optim.Adagrad(model.parameters(), lr=0.001, weight_decay=1e-6),
         'distmult': optim.Adam(model.parameters(), lr=0.0001, weight_decay=1e-6),
-        'rotate': optim.Adam(model.parameters(), lr=1e-3),
+        'rotate': optim.Adam(model.parameters(), lr=1e-4),
     }
     optimizer = optimizer_map[args.model]
 
@@ -116,9 +116,9 @@ if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
     argparser.add_argument('--dataset', type=str, required=True)
     argparser.add_argument('--model', choices=model_map.keys(), type=str.lower, default='rotate')
-    argparser.add_argument('--epochs', type=int, default=1000)
-    argparser.add_argument('--testrate', type=int, default=100)
-    argparser.add_argument('--saverate', type=int, default=100)
+    argparser.add_argument('--epochs', type=int, default=100)
+    argparser.add_argument('--testrate', type=int, default=10)
+    argparser.add_argument('--saverate', type=int, default=10)
     args = argparser.parse_args()
     mp.set_start_method('spawn', force=True)
     main(args)
