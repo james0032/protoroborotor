@@ -50,7 +50,7 @@ def main(args):
         head_index=train_data.edge_index[0],
         rel_type=train_data.edge_type,
         tail_index=train_data.edge_index[1],
-        batch_size=10000,
+        batch_size=500000,
         shuffle=True,
         num_workers=0,
     )
@@ -59,7 +59,7 @@ def main(args):
         'transe': optim.Adam(model.parameters(), lr=0.01),
         'complex': optim.Adagrad(model.parameters(), lr=0.001, weight_decay=1e-6),
         'distmult': optim.Adam(model.parameters(), lr=0.0001, weight_decay=1e-6),
-        'rotate': optim.Adam(model.parameters(), lr=1e-4),
+        'rotate': optim.Adam(model.parameters(), lr=1e-3),
     }
     optimizer = optimizer_map[args.model]
 
@@ -105,7 +105,7 @@ def test(data, model):
         head_index=data.edge_index[0],
         rel_type=data.edge_type,
         tail_index=data.edge_index[1],
-        batch_size=20000,
+        batch_size=200,
         k=10,
         log=False
     )
