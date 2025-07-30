@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import csv
 import os
-from torch_geometric.nn.models import RotatE
+from torch_geometric.nn import RotatE
 
 # === Config ===
 
@@ -14,8 +14,8 @@ BASE_PATH = '/workspace/data/robokop/rCD'
 MODEL_PATH = os.path.join(BASE_PATH, 'model_10.pt')
 ENTITY_OUTPUT_TSV = os.path.join(BASE_PATH, 'projected_entity_embeddings.tsv')
 
-NODE_DICT_PATH = os.path.join(BASE_PATH, 'node_dict.tsv') #os.path.join(BASE_PATH, 'processed', 'node_dict.tsv')
-REL_DICT_PATH = os.path.join(BASE_PATH, 'rel_dict.tsv') #os.path.join(BASE_PATH, 'processed', 'rel_dict.tsv')
+NODE_DICT_PATH = os.path.join(BASE_PATH, 'processed', 'node_dict')
+REL_DICT_PATH = os.path.join(BASE_PATH, 'processed', 'rel_dict')
 BATCH_SIZE = 4096  # Tune based on memory size
 
 # === Load index→name dictionaries from TSV ===
@@ -38,7 +38,14 @@ def load_trained_model(path: str, num_nodes: int, num_relations: int) -> RotatE:
         hidden_channels=HIDDEN_DIM,
     ).to(DEVICE)
 
-    state_dict = torch.load(path, map_location=DEVICE)
+    checkpoint = torch.load(path, map_location=DEVICE)
+    print("Checkpoint keys:", checkpoint.keys())
+    # If your checkpoint has nested keys like "model_state_dict", extract them
+    if 'model_state_dict' in checkpoint:
+        state_dict = checkpoint['model_state_dict']
+    else:
+        state_dict = checkpoint  # fallback if it's already flat
+    print("state_dict keys:", state_dict.keys())
     model.load_state_dict(state_dict)
     model.eval()
     return model
@@ -92,6 +99,7 @@ def main():
     NUM_RELATIONS = len(rel_dict)
 
     model = load_trained_model(MODEL_PATH, NUM_ENTITIES, NUM_RELATIONS)
+    print("Model loaded!")
     entity_proj, relation_proj = create_projection_layers()
 
     # Only project and save entity embeddings for now
