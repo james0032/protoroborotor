@@ -54,8 +54,8 @@ def load_trained_model(path: str, num_nodes: int, num_relations: int) -> RotatE:
 # === Create projection layers ===
 
 def create_projection_layers() -> tuple:
-    entity_proj = nn.Linear(HIDDEN_DIM, PROJECTED_DIM).to(DEVICE)
-    relation_proj = nn.Linear(HIDDEN_DIM, PROJECTED_DIM).to(DEVICE)
+    entity_proj = nn.Linear(2*HIDDEN_DIM, PROJECTED_DIM).to(DEVICE)
+    relation_proj = nn.Linear(2*HIDDEN_DIM, PROJECTED_DIM).to(DEVICE)
     return entity_proj, relation_proj
 
 
@@ -103,7 +103,12 @@ def main():
     entity_proj, relation_proj = create_projection_layers()
 
     # Only project and save entity embeddings for now
-    entity_embed = model.entity_embedding.weight.detach()
+    entity_real = model.node_emb.weight.detach()
+    entity_imag = model.node_emb_im.weight.detach()
+    entity_embed = torch.cat([entity_real, entity_imag], dim=1)  # [num_entities, 2 * hidden_dim]
+
+    #relation_embed = model.rel_emb.weight.detach()
+    
     save_entity_embeddings_batched(entity_embed, node_dict, entity_proj, ENTITY_OUTPUT_TSV, batch_size=BATCH_SIZE)
 
 
