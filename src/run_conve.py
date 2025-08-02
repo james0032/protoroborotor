@@ -9,13 +9,17 @@ import torch.multiprocessing as mp
 from torch_geometric.data import Data
 from typing import List, Tuple
 from tqdm import tqdm
+
+import sys
+sys.path.append("/Users/jchung/Documents/RENCI/everycure/experiments/Influence_estimate/protoroborotor")
+print("Args received:", sys.argv)
 from src.ROBOKOP_Data import ROBOKOP
 from src.models import ConvE
 
 def main(args):
-    device = 'cuda'
+    #device = 'cuda'
     print("CUDA?", torch.cuda.is_available())
-    #device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     #v1 is a full robokop baseline - subclass, with 80/20/20 split
     path = osp.join(osp.dirname(osp.realpath(__file__)), '..',  '..', 'robokop', args.dataset)
 
@@ -28,14 +32,22 @@ def main(args):
     train_data = ROBOKOP(path, split='train')[0].to(device)
     val_data = ROBOKOP(path, split='val')[0].to(device)
     test_data = ROBOKOP(path, split='test')[0].to(device)
-    train_triples = data_to_triples(train_data)
-    valid_triples = data_to_triples(val_data)
-    test_triples = data_to_triples(test_data)   
-    all_triples = generate_all_triples(train_triples, valid_triples, test_triples)
+    all_edge_types = torch.cat([
+    train_data.edge_type,
+    val_data.edge_type,
+    test_data.edge_type
+    ])
+    num_edge_types = torch.unique(all_edge_types).numel()
+    
+    
+    #train_triples = data_to_triples(train_data)
+    #valid_triples = data_to_triples(val_data)
+    #test_triples = data_to_triples(test_data)   
+    #all_triples = generate_all_triples(train_triples, valid_triples, test_triples)
     #model_arg_map = {'rotate': {'margin': 9.0}}
     model = ConvE(
         num_entities=train_data.num_nodes,
-        num_relations=train_data.num_edge_types,
+        num_relations=num_edge_types,
         #embedding_dim=200, input_drop=0.2, hidden_drop=0.3, feature_map_drop=0.2
         #hidden_channels=50,
         #**model_arg_map.get(args.model, {}),
@@ -69,30 +81,42 @@ def main(args):
                 'loss': loss
             }, f"{path}/model_{epoch}.pt")
         if epoch % args.testrate == 0:
-            metrics = evaluate_link_prediction(model, valid_triples, all_triples, model.num_nodes)
-            print(f'Epoch: {epoch:03d}, Val Mean Rank: {metrics["mean_rank"]:.2f}, '
-                f'Val MRR: {metrics["mrr"]:.2f}, Val Hits@10: {metrics["hits@10"]:.2f}')
+            rank, mrr, hits = test(val_data, model)
+            print(f'Epoch: {epoch:03d}, Val Mean Rank: {rank:.2f}, '
+                f'Val MRR: {mrr:.2f}, Val Hits@10: {hits:.2f}')
 
     print("One last test")
-    metrics = evaluate_link_prediction(model, test_triples, all_triples)
-    print(f'Test Mean Rank: {metrics["mean_rank"]:.2f}, '
-                f'Test MRR: {metrics["mrr"]:.2f}, Test Hits@10: {metrics["hits@10"]:.2f}')
+    rank, mrr, hits = test(val_data, model)
+    print(f'Test Mean Rank: {rank:.2f}, '
+                f'Test MRR: {mrr:.2f}, Test Hits@10: {hits:.2f}')
 
 def train(model, loader, optimizer):
     model.train()
-    #total_loss = total_examples = 0
+    total_loss = total_examples = 0
     for head_index, rel_type, tail_index in loader:
         optimizer.zero_grad()
-        pred = model.forward(head_index, rel_type)
-        target = torch.zeros_like(pred)  # shape: [B, num_entities]
-        target.scatter_(1, tail_index.view(-1, 1), 1.0)  # set 1 at true tail
-        loss = model.loss(pred, target)
+        #pred = model.forward(head_index, rel_type, tail_index)
+        #target = torch.zeros_like(pred)  # shape: [B, num_entities]
+        #target.scatter_(1, tail_index.view(-1, 1), 1.0)  # set 1 at true tail
+        loss = model.loss(head_index, rel_type, tail_index)
         loss.backward()
         optimizer.step()
-        #total_loss += float(loss) * head_index.numel()
-        #total_examples += head_index.numel()
-    return loss #total_loss / total_examples
+        total_loss += float(loss) * head_index.numel()
+        total_examples += head_index.numel()
+    return total_loss / total_examples
 
+@torch.no_grad()
+def test(data, model):
+    model.eval()
+    print("Testing Model")
+    return model.test(
+        head_index=data.edge_index[0],
+        rel_type=data.edge_type,
+        tail_index=data.edge_index[1],
+        batch_size=10000,
+        k=10,
+        log=False
+    )
 
 def data_to_triples(data: Data) -> List[Tuple[int, int, int]]:
     """
@@ -195,7 +219,7 @@ if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
     argparser.add_argument('--dataset', type=str, required=True)
     #argparser.add_argument('--model', choices=model_map.keys(), type=str.lower, default='rotate')
-    argparser.add_argument('--epochs', type=int, default=500)
+    argparser.add_argument('--epochs', type=int, default=100)
     argparser.add_argument('--testrate', type=int, default=10)
     argparser.add_argument('--saverate', type=int, default=10)
     args = argparser.parse_args()

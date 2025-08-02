@@ -62,8 +62,28 @@ def main(args):
         'rotate': optim.Adam(model.parameters(), lr=1e-3),
     }
     optimizer = optimizer_map[args.model]
+    if args.keeptrain:
+        # Infer checkpoint path from epoch if not explicitly given
+        if args.checkpoint_path is None:
+            if args.resume_epoch is None:
+                raise ValueError("If --keeptrain is set, you must provide --resume_epoch or --checkpoint_path.")
+            checkpoint_path = f'model_{args.resume_epoch}.pt'
+            print("checkpoint read by assigning epoch.")
+        else:
+            checkpoint_path = args.checkpoint_path
+            print("checkpoint read by file path.")
+        # Load checkpoint
+        checkpoint = torch.load(checkpoint_path, map_location=device)
+        model.load_state_dict(checkpoint['model_state_dict'])
 
-    for epoch in range(1, args.epochs):
+        if 'optimizer_state_dict' in checkpoint:
+            optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+
+        start_epoch = checkpoint.get('epoch', args.resume_epoch or 1)
+    else:
+        start_epoch = 1
+        
+    for epoch in range(start_epoch, args.epochs):
         loss = train(model, loader, optimizer)
         print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
         if epoch % args.saverate == 0:
@@ -116,9 +136,18 @@ if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
     argparser.add_argument('--dataset', type=str, required=True)
     argparser.add_argument('--model', choices=model_map.keys(), type=str.lower, default='rotate')
-    argparser.add_argument('--epochs', type=int, default=100)
-    argparser.add_argument('--testrate', type=int, default=10)
-    argparser.add_argument('--saverate', type=int, default=10)
+    argparser.add_argument('--epochs', type=int, default=1000)
+    argparser.add_argument('--testrate', type=int, default=100)
+    argparser.add_argument('--saverate', type=int, default=100)
+    # Flag to indicate whether to resume training
+    argparser.add_argument('--keeptrain', action='store_true', help='Resume training from a saved checkpoint.')
+
+    # Optional argument to specify which checkpoint epoch to load
+    argparser.add_argument('--resume_epoch', type=int, default=None, help='Epoch number to resume from.')
+
+    # Optional: path to checkpoint file (in case naming is flexible)
+    argparser.add_argument('--checkpoint_path', type=str, default=None, help='Path to model checkpoint file.')
+
     args = argparser.parse_args()
     mp.set_start_method('spawn', force=True)
     main(args)
