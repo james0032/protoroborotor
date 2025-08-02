@@ -63,10 +63,11 @@ def main(args):
         if args.checkpoint_path is None:
             if args.resume_epoch is None:
                 raise ValueError("If --keeptrain is set, you must provide --resume_epoch or --checkpoint_path.")
-            checkpoint_path = f'checkpoint_epoch_{args.resume_epoch}.pt'
+            checkpoint_path = f'model_{args.resume_epoch}.pt'
+            print("checkpoint read by assigning epoch.")
         else:
             checkpoint_path = args.checkpoint_path
-
+            print("checkpoint read by file path.")
         # Load checkpoint
         checkpoint = torch.load(checkpoint_path, map_location=device)
         model.load_state_dict(checkpoint['model_state_dict'])
