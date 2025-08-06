@@ -91,9 +91,9 @@ def main(args):
 
 
     lazy_df = lazy_df.with_columns([
-        map_column_to_id(pl.col("head"), node_dict).alias("head_id"),
+        map_column_to_id("source", node_dict).alias("head_id"),
         #map_column_to_id(pl.col("rel"), rel_dict).alias("rel_id"),
-        map_column_to_id(pl.col("tail"), node_dict).alias("tail_id"),
+        map_column_to_id("target", node_dict).alias("tail_id"),
     ]).select(["head_id", "rel_id", "tail_id"])
 
 
