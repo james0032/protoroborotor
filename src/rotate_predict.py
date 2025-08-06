@@ -91,7 +91,7 @@ def main(args):
 
 
 
-    lazy_df = lazy_df.with_columns([
+    iddf = lazy_df.with_columns([
         map_column_to_id("source", node_dict).alias("head_id"),
         #map_column_to_id(pl.col("rel"), rel_dict).alias("rel_id"),
         map_column_to_id("target", node_dict).alias("tail_id"),
@@ -100,7 +100,7 @@ def main(args):
 
 
 
-    dataset = TripleBatchIterableDataset(lazy_df)
+    dataset = TripleBatchIterableDataset(iddf)
     dataloader = DataLoader(dataset, batch_size=8192)
 
 
@@ -112,6 +112,10 @@ def main(args):
             prob = sigmoid(scores)
             for s in prob.cpu().tolist():
                 fout.write(f"{s}\n")
+    
+    lazy_df = lazy_df.with_columns(
+        pl.Series("rotate_prob", prob)
+    )
                 
 if __name__ == "__main__":
     
