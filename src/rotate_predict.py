@@ -1,4 +1,5 @@
 import torch
+from torch.nn.functional import sigmoid
 import polars as pl
 from torch.utils.data import DataLoader, IterableDataset
 from torch_geometric.nn import RotatE
@@ -60,7 +61,7 @@ class TripleBatchIterableDataset(IterableDataset):
         self.batch_size = batch_size
 
     def __iter__(self):
-        df_materialized = self.df.collect(streaming=True)
+        df_materialized = self.df.collect(engine="streaming")
         for batch in df_materialized.iter_rows(named=True):
             yield (
                 torch.tensor(batch["head_id"], dtype=torch.long),
@@ -108,7 +109,8 @@ def main(args):
         for batch in dataloader:
             h, r, t = [x.to(DEVICE) for x in batch]
             scores = model(h, r, t)  # shape: [batch_size]
-            for s in scores.cpu().tolist():
+            prob = sigmoid(scores)
+            for s in prob.cpu().tolist():
                 fout.write(f"{s}\n")
                 
 if __name__ == "__main__":
