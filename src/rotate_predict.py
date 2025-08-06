@@ -112,10 +112,6 @@ def main(args):
             prob = sigmoid(scores)
             for s in prob.cpu().tolist():
                 fout.write(f"{s}\n")
-    
-    lazy_df = lazy_df.with_columns(
-        pl.Series("rotate_prob", prob)
-    )
                 
 if __name__ == "__main__":
     
