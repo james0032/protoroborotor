@@ -1,10 +1,13 @@
 import torch
 import polars as pl
 from torch.utils.data import DataLoader, IterableDataset
-from torch_geometric.nn.models import RotatE
+from torch_geometric.nn import RotatE
 import json
 import os
+import argparse
+
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(DEVICE)
 HIDDEN_DIM = 100
 
 BASE_PATH = '/workspace/data/robokop/rCD'
@@ -27,8 +30,7 @@ def load_dict_from_tsv(path: str) -> dict:
             mapping[name] = idx
     return mapping
 
-node_dict = load_dict_from_tsv(NODE_DICT_PATH)
-rel_dict = load_dict_from_tsv(REL_DICT_PATH)
+
 
 # ---------- Load Model ----------
 
@@ -51,31 +53,6 @@ def load_trained_model(path: str, num_nodes: int, num_relations: int) -> RotatE:
     model.eval()
     return model
 
-
-model = load_trained_model(MODEL_PATH, len(node_dict), len(rel_dict))
-print("Model loaded!")
-
-
-# ---------- Polars Lazy Loading and String-to-ID Mapping ----------
-test_path = TEST_FILE  # tab-separated file: head \t relation \t tail
-
-lazy_df = pl.scan_csv(test_path, separator="\t", has_header=True).with_columns(
-    pl.lit(70).alias("rel_id")
-    )#, new_columns=["head", "tail"])
-
-# Convert string columns to integer IDs
-def map_column_to_id(col, mapping):
-    return pl.when(col.is_in(list(mapping.keys()))) \
-             .then(col.map_dict(mapping, return_dtype=pl.Int64)) \
-             .otherwise(None)  # or raise error if unknown ID
-
-lazy_df = lazy_df.with_columns([
-    map_column_to_id(pl.col("head"), node_dict).alias("head_id"),
-    #map_column_to_id(pl.col("rel"), rel_dict).alias("rel_id"),
-    map_column_to_id(pl.col("tail"), node_dict).alias("tail_id"),
-]).select(["head_id", "rel_id", "tail_id"])
-
-
 # ---------- Convert to Batched PyTorch Dataset ----------
 class TripleBatchIterableDataset(IterableDataset):
     def __init__(self, polars_lazy_df, batch_size=BATCH_SIZE):
@@ -91,15 +68,54 @@ class TripleBatchIterableDataset(IterableDataset):
                 torch.tensor(batch["tail_id"], dtype=torch.long)
             )
 
+# Convert string columns to integer IDs
+def map_column_to_id(col_name, mapping):
+    return pl.col(col_name).replace(mapping).cast(pl.Int64)
 
-dataset = TripleBatchIterableDataset(lazy_df)
-dataloader = DataLoader(dataset, batch_size=8192)
+
+def main(args):
+    node_dict = load_dict_from_tsv(NODE_DICT_PATH)
+    rel_dict = load_dict_from_tsv(REL_DICT_PATH)
+
+    model = load_trained_model(MODEL_PATH, len(node_dict), len(rel_dict))
+    print("Model loaded!")
 
 
-# ---------- Run Predictions and Write Scores ----------
-with torch.no_grad(), open("rotate_scores.txt", "w") as fout:
-    for batch in dataloader:
-        h, r, t = [x.to(DEVICE) for x in batch]
-        scores = model(h, r, t)  # shape: [batch_size]
-        for s in scores.cpu().tolist():
-            fout.write(f"{s}\n")
+    # ---------- Polars Lazy Loading and String-to-ID Mapping ----------
+    test_path = args.input  # tab-separated file: head \t relation \t tail
+
+    lazy_df = pl.scan_csv(test_path, separator="\t", has_header=True).with_columns(
+        pl.lit(70).alias("rel_id") # this is dynamic for each model trained. Need to parameterized this later!!
+        )#, new_columns=["head", "tail"])
+
+
+
+    lazy_df = lazy_df.with_columns([
+        map_column_to_id(pl.col("head"), node_dict).alias("head_id"),
+        #map_column_to_id(pl.col("rel"), rel_dict).alias("rel_id"),
+        map_column_to_id(pl.col("tail"), node_dict).alias("tail_id"),
+    ]).select(["head_id", "rel_id", "tail_id"])
+
+
+
+
+    dataset = TripleBatchIterableDataset(lazy_df)
+    dataloader = DataLoader(dataset, batch_size=8192)
+
+
+    # ---------- Run Predictions and Write Scores ----------
+    with torch.no_grad(), open(os.path.join(BASE_PATH, args.output), "w") as fout:
+        for batch in dataloader:
+            h, r, t = [x.to(DEVICE) for x in batch]
+            scores = model(h, r, t)  # shape: [batch_size]
+            for s in scores.cpu().tolist():
+                fout.write(f"{s}\n")
+                
+if __name__ == "__main__":
+    
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument('--input', type=str, required=True)
+    argparser.add_argument('--output', type=str, required=True)
+    
+    args = argparser.parse_args()
+    main(args)
