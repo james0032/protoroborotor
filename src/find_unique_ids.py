@@ -36,5 +36,5 @@ if __name__ == "__main__":
     print(f"Number of unique entities in JSONL: {len(unique_entities)}")
     print("Unique entities:")
     for eid in unique_entities:
-        print(f'{{"object":{eid},"subject":{eid},"predicate":"biolink:related_to"}}')
+        print(f'{{"object":"{eid}","subject":"{eid}","predicate":"biolink:related_to"}}')
         #print(eid)
