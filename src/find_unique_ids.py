@@ -34,7 +34,7 @@ if __name__ == "__main__":
     unique_entities = find_unique_entities(jsonl_ids, index_map_ids)
 
     print(f"Number of unique entities in JSONL: {len(unique_entities)}")
-    print("Top 60 unique entities:")
-    for eid in unique_entities[:60]:
-        print(f'\{"object":{eid},"subject":{eid},"predicate":"biolink:subclass_of"\}')
+    print("Unique entities:")
+    for eid in unique_entities:
+        print(f'{{"object":{eid},"subject":{eid},"predicate":"biolink:related_to"}}')
         #print(eid)
