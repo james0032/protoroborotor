@@ -22,7 +22,10 @@ col_names = schema.names()
 newpl = newpl.rename({col_names[0]: "id", col_names[1]: "topological_embedding"})
 newpl = newpl.with_columns(
     pl.col("id").cast(pl.Utf8),
-    pl.col("topological_embedding").cast(pl.List(pl.Float32))
+    pl.col("topological_embedding")
+      .str.strip_chars("[]")               # remove brackets
+      .str.split(",")                       # split into list of strings
+      .list.eval(pl.element().cast(pl.Float32))  # cast each element
 )
 newpl_count = newpl.select(pl.len()).collect().row(0)[0]
 print("New emb is ready for merge and has number of rows:", newpl_count)
