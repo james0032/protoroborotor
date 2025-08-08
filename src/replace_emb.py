@@ -10,10 +10,12 @@ BASE_PATH = "/workspace/data/robokop/rCD"
 
 df = pl.scan_parquet("gs://mtrx-us-central1-hub-dev-storage/kedro/data/tests/rotate_esuite/runs/rtx-base-feat3-3ce2b620/datasets/embeddings/feat/nodes_with_embeddings/")
 #print("Begining size of nodes with embeddings", df.shape)
-row_count = df.select(pl.count()).collect().row(0)[0]
+row_count = df.select(pl.len()).collect().row(0)[0]
 print("df has number of rows", row_count)
 newpl = pl.scan_csv(os.path.join(BASE_PATH, "projected_entity_embeddings.tsv"), separator='\t', has_header=False)
-newpl = newpl.rename({newpl.columns[0]: "id", newpl.columns[1]: "topological_embedding"})
+schema = newpl.collect_schema()
+col_names = schema.names()
+newpl = newpl.rename({col_names[0]: "id", col_names[1]: "topological_embedding"})
 ## Step 2: Vectorized string-to-list[f32] parsing
 #new["topological_embedding"] = new["topo"].progress_apply(
 #    lambda x: np.array(ast.literal_eval(x), dtype=np.float32)
@@ -25,7 +27,7 @@ newpl = newpl.with_columns(
     pl.col("topological_embedding").cast(pl.List(pl.Float32))
 )
 #newpl = newpl.drop("topo")
-newpl_count = newpl.select(pl.count()).collect().row(0)[0]
+newpl_count = newpl.select(pl.len()).collect().row(0)[0]
 print("New emb is ready for merge and has number of rows:", newpl_count)
 # Step 4: df to drop topo and join new to df
 df = df.drop("topological_embedding")
