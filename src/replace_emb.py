@@ -9,7 +9,7 @@ import os
 BASE_PATH = "/workspace/data/robokop/rCD"
 
 # Step 1: Read both old and new emb files
-df = pl.scan_parquet("gs://mtrx-us-central1-hub-dev-storage/kedro/data/tests/rotate_esuite/runs/rtx-base-feat3-3ce2b620/datasets/embeddings/feat/nodes_with_embeddings/")
+df = pl.scan_parquet("gs://mtrx-us-central1-hub-dev-storage/data/01_RAW/modeling/UNC10/rotatE_on_KG2/rotate_emb_match_feat3/")
 #print("Begining size of nodes with embeddings", df.shape)
 df = df.with_columns(pl.col("id").cast(pl.Utf8).str.strip_chars('"'))
 row_count = df.select(pl.len()).collect().row(0)[0]
