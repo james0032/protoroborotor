@@ -15,7 +15,7 @@ df = df.with_columns(pl.col("id").cast(pl.Utf8).str.strip_chars('"'))
 row_count = df.select(pl.len()).collect().row(0)[0]
 print("df has number of rows", row_count)
 dupes = df.group_by("id").agg(pl.len().alias("count")).filter(pl.col("count")>1)
-print("Duplicated id in matrix pipeline generated embedding file", dupes)
+print("Duplicated id in matrix pipeline generated embedding file", dupes.collect())
 
 # Step 2: Read new embedding file and format data type to match matrix pipeline
 newpl = pl.scan_csv(os.path.join(BASE_PATH, "projected_entity_embeddings.tsv"), separator='\t', has_header=False)
@@ -33,7 +33,7 @@ newpl = newpl.with_columns(
 newpl_count = newpl.select(pl.len()).collect().row(0)[0]
 print("New emb is ready for merge and has number of rows:", newpl_count)
 dupes = newpl.group_by("id").agg(pl.len().alias("count")).filter(pl.col("count")>1)
-print("Duplicate ids in new embedding", dupes)
+print("Duplicate ids in new embedding", dupes.collect())
 
 # Step 3: df to drop topo and join new to df
 df = df.drop("topological_embedding")
