@@ -21,7 +21,7 @@ col_names = schema.names()
 # Step 2: Format data type to match matrix pipeline
 newpl = newpl.rename({col_names[0]: "id", col_names[1]: "topological_embedding"})
 newpl = newpl.with_columns(
-    pl.col("id").cast(pl.Utf8),
+    pl.col("id").cast(pl.Utf8).str.replace_all(r"\s+", ""),
     pl.col("topological_embedding")
       .str.strip_chars("[]")                          # remove [ ]
       .str.split(",")                                 # split into list of strings
@@ -33,22 +33,24 @@ print("New emb is ready for merge and has number of rows:", newpl_count)
 df = df.drop("topological_embedding")
 df = df.join(newpl, on="id", how="inner")
 #print("Final size of nodes with embeddings", df.shape)
+row_count = df.select(pl.len()).collect().row(0)[0]
+print("After join, df has number of rows", row_count)
 
-output_dir = os.path.join(BASE_PATH, "rotate_emb")
-os.makedirs(output_dir, exist_ok=True)
+#output_dir = os.path.join(BASE_PATH, "rotate_emb")
+#os.makedirs(output_dir, exist_ok=True)
 
 # Split into 200 roughly equal partitions
-num_partitions = 200
+#num_partitions = 200
 
-partition_size = row_count // num_partitions + 1
+#partition_size = row_count // num_partitions + 1
 
-for i in range(num_partitions):
-    start = i * partition_size
-    end = min((i + 1) * partition_size, newpl_count)
-    df_slice = df.slice(start, end-start)
-    
-    # Save each partition
-    df_slice.sink_parquet(
-        f"{output_dir}/part_{i:05d}.snappy.parquet", 
-        compression="snappy"
-    )
+#for i in range(num_partitions):
+#    start = i * partition_size
+#    end = min((i + 1) * partition_size, newpl_count)
+#    df_slice = df.slice(start, end-start)
+#    
+#    # Save each partition
+#    df_slice.sink_parquet(
+#        f"{output_dir}/part_{i:05d}.snappy.parquet", 
+#        compression="snappy"
+#    )
