@@ -46,8 +46,8 @@ partition_size = (row_count // num_partitions) + 1
 
 for i in range(num_partitions):
     start = i * partition_size
-    end = min((i + 1) * partition_size, row_count)
-    df_slice = df.slice(start, end-start)
+    length = min(partition_size, row_count-start)
+    df_slice = df.slice(start, length)
     
     # Save each partition
     df_slice.sink_parquet(
