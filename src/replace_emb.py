@@ -43,14 +43,14 @@ os.makedirs(output_dir, exist_ok=True)
 num_partitions = 200
 
 partition_size = (row_count // num_partitions) + 1
-
-for i in range(num_partitions):
-    start = i * partition_size
-    length = min(partition_size, row_count-start)
-    df_slice = df.slice(start, length)
-    
-    # Save each partition
-    df_slice.sink_parquet(
-        f"{output_dir}/part_{i:05d}.snappy.parquet", 
-        compression="snappy"
-    )
+df.sink_parquet(f"{output_dir}/all.snappy.parquet", compression="snappy")
+#for i in range(num_partitions):
+#    start = i * partition_size
+#    length = min(partition_size, row_count-start)
+#    df_slice = df.slice(start, length)
+#   
+#    # Save each partition
+#    df_slice.sink_parquet(
+#        f"{output_dir}/part_{i:05d}.snappy.parquet", 
+#        compression="snappy"
+#    )
