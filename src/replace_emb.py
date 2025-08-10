@@ -41,7 +41,8 @@ df = df.join(newpl, on="id", how="left")
 #print("Final size of nodes with embeddings", df.shape)
 row_count = df.select(pl.len()).collect().row(0)[0]
 print("After join, df has number of rows", row_count)
-
+nullcheck = df.filter(pl.col("topological_embedding").is_null())
+print(nullcheck.collect())
 output_dir = os.path.join(BASE_PATH, "rotate_emb")
 os.makedirs(output_dir, exist_ok=True)
 
