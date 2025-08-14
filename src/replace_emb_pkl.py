@@ -1,8 +1,10 @@
 import pickle
 import polars as pl
+import numpy as np
 import torch
 import torch.nn as nn
 import os
+import math
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using device:", device)
@@ -29,15 +31,30 @@ newpl = pl.DataFrame({
     "topological_embedding": list(data.values())
 })
 proj = nn.Linear(100, 512).to(device)
-# 2. Convert embeddings to tensor
-emb_tensor = torch.tensor(newpl["topological_embedding"].to_list(), dtype=torch.float32, device=device)  # shape: [num_nodes, 100]
 
-# 3. Apply projection
-emb_proj = proj(emb_tensor)  # shape: [num_nodes, 512]
+batch_size = 1024  # adjust based on your GPU memory
+emb_list = newpl["topological_embedding"].to_list()
+num_nodes = len(emb_list)
+print(f"pkl has number of nodes:{num_nodes}")
+num_batches = math.ceil(num_nodes / batch_size)
 
-# 4. Convert back to list for Polars
+all_proj = []
+
+for i in range(num_batches):
+    start = i * batch_size
+    end = min((i + 1) * batch_size, num_nodes)
+    
+    batch_tensor = torch.tensor(emb_list[start:end], dtype=torch.float32, device=device)
+    batch_proj = proj(batch_tensor)
+    print(f"batch {i:3d} projection done.")
+    all_proj.append(batch_proj.cpu().detach().numpy())
+
+# Concatenate all batches
+all_proj = np.vstack(all_proj)
+
+# Replace the column in Polars
 newpl = newpl.with_columns(
-    pl.Series("topological_embedding", emb_proj.cpu().detach().numpy().tolist())
+    pl.Series("topological_embedding", all_proj.tolist())
 )
 newpl = newpl.lazy()
 
