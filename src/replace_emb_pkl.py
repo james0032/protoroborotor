@@ -32,7 +32,7 @@ newpl = pl.DataFrame({
 })
 proj = nn.Linear(100, 512).to(device)
 
-batch_size = 1024  # adjust based on your GPU memory
+batch_size = 50000  # adjust based on your GPU memory
 emb_list = newpl["topological_embedding"].to_list()
 num_nodes = len(emb_list)
 print(f"pkl has number of nodes:{num_nodes}")
@@ -55,7 +55,7 @@ for i in range(num_batches):
     })
     pl_chunks.append(pl_chunk)
     file_name = f"topo_embedding_512_batch_{i:04d}.parquet"
-    pl_chunk.write_parquet(os.path.jion(output_dir, file_name), compression="snappy")
+    pl_chunk.write_parquet(os.path.join(output_dir, file_name), compression="snappy")
     print(f"Batch {i:3d} saved to {file_name}")
     #all_proj.append(batch_proj.cpu().detach().numpy())
 
