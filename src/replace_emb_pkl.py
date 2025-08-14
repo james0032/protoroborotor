@@ -30,7 +30,7 @@ newpl = pl.DataFrame({
 })
 proj = nn.Linear(100, 512).to(device)
 # 2. Convert embeddings to tensor
-emb_tensor = torch.tensor(df["topological_embedding"].to_list(), dtype=torch.float32)  # shape: [num_nodes, 100]
+emb_tensor = torch.tensor(newpl["topological_embedding"].to_list(), dtype=torch.float32, device=device)  # shape: [num_nodes, 100]
 
 # 3. Apply projection
 emb_proj = proj(emb_tensor)  # shape: [num_nodes, 512]
