@@ -54,7 +54,13 @@ def make_newpl():
         pl_chunk = pl.DataFrame({
             "id": newpl["id"][start:end],
             "topological_embedding": batch_proj_cpu
-        })
+        },
+            schema={
+            "id": pl.Utf8,
+            "topological_embedding": pl.List(pl.Float32)
+            }
+                                
+        )
         pl_chunks.append(pl_chunk)
         file_name = f"topo_embedding_512_batch_{i:04d}.parquet"
         pl_chunk.write_parquet(os.path.join(output_dir, file_name), compression="snappy")
@@ -75,13 +81,7 @@ def make_newpl():
 input_dir = os.path.join(BASE_PATH, "biobert_emb")
 os.makedirs(input_dir, exist_ok=True)
 newpl = pl.scan_parquet(input_dir)
-newpl = newpl.with_columns(
-    pl.col("id").cast(pl.Utf8).str.replace_all(r"\s+", ""),
-    pl.col("topological_embedding")
-      .str.strip_chars("[]")                          # remove [ ]
-      .str.split(",")                                 # split into list of strings
-      .list.eval(pl.element().str.strip_chars().cast(pl.Float32))  # trim & cast
-)
+
 # ========== section to annotate if want to make new parquet from pkl
 
 
