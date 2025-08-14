@@ -38,7 +38,8 @@ num_nodes = len(emb_list)
 print(f"pkl has number of nodes:{num_nodes}")
 num_batches = math.ceil(num_nodes / batch_size)
 
-all_proj = []
+
+pl_chunks = []
 
 for i in range(num_batches):
     start = i * batch_size
@@ -47,15 +48,16 @@ for i in range(num_batches):
     batch_tensor = torch.tensor(emb_list[start:end], dtype=torch.float32, device=device)
     batch_proj = proj(batch_tensor)
     print(f"batch {i:3d} projection done.")
-    all_proj.append(batch_proj.cpu().detach().numpy())
+    batch_proj_cpu = batch_proj.cpu().detach().numpy().tolist()
+    pl_chunk = pl.DataFrame({
+        "id": newpl["id"][start:end],
+        "topological_embedding": batch_proj_cpu
+    })
+    pl_chunks.append(pl_chunk)
+    #all_proj.append(batch_proj.cpu().detach().numpy())
 
-# Concatenate all batches
-all_proj = np.vstack(all_proj)
-
-# Replace the column in Polars
-newpl = newpl.with_columns(
-    pl.Series("topological_embedding", all_proj.tolist())
-)
+# Concatenate at the end (Polars is memory-efficient here)
+newpl = pl.concat(pl_chunks)
 newpl = newpl.lazy()
 
 newpl_count = newpl.select(pl.len()).collect().row(0)[0]
