@@ -40,25 +40,28 @@ num_batches = math.ceil(num_nodes / batch_size)
 
 
 pl_chunks = []
-
+output_dir = os.path.join(BASE_PATH, "biobert_emb")
+os.makedirs(output_dir, exist_ok=True)
 for i in range(num_batches):
     start = i * batch_size
     end = min((i + 1) * batch_size, num_nodes)
     
     batch_tensor = torch.tensor(emb_list[start:end], dtype=torch.float32, device=device)
     batch_proj = proj(batch_tensor)
-    print(f"batch {i:3d} projection done.")
     batch_proj_cpu = batch_proj.cpu().detach().numpy().tolist()
     pl_chunk = pl.DataFrame({
         "id": newpl["id"][start:end],
         "topological_embedding": batch_proj_cpu
     })
     pl_chunks.append(pl_chunk)
+    file_name = f"topo_embedding_512_batch_{i:04d}.parquet"
+    pl_chunk.write_parquet(os.path.jion(output_dir, file_name), compression="snappy")
+    print(f"Batch {i:3d} saved to {file_name}")
     #all_proj.append(batch_proj.cpu().detach().numpy())
 
 # Concatenate at the end (Polars is memory-efficient here)
-newpl = pl.concat(pl_chunks)
-newpl.write_parquet("topological_embeddings_512.parquet")
+#newpl = pl.concat(pl_chunks)
+#newpl.write_parquet("topological_embeddings_512.parquet")
 print("Parquet file saved successfully.")
 newpl = newpl.lazy()
 
