@@ -20,50 +20,63 @@ print("df has number of rows", row_count)
 dupes = df.group_by("id").agg(pl.len().alias("count")).filter(pl.col("count")>1)
 print("Duplicated id in matrix pipeline generated embedding file", dupes.collect())
 
-# Step 2: Read new embedding file and format data type to match matrix pipeline
-# 1. Load pickle file
-with open("/projects/aixb/jchung/ROBOKOP/git/keep_all_nobert/xDTD_training_pipeline/data/text_embedding/embedding_biobert_namecat.pkl", "rb") as f:
-    data = pickle.load(f)  # data is a dict {id: list[f32]}
-
-# 2. Convert dict to Polars DataFrame
-newpl = pl.DataFrame({
-    "id": list(data.keys()),
-    "topological_embedding": list(data.values())
-})
-proj = nn.Linear(100, 512).to(device)
-
-batch_size = 50000  # adjust based on your GPU memory
-emb_list = newpl["topological_embedding"].to_list()
-num_nodes = len(emb_list)
-print(f"pkl has number of nodes:{num_nodes}")
-num_batches = math.ceil(num_nodes / batch_size)
 
 
-pl_chunks = []
-output_dir = os.path.join(BASE_PATH, "biobert_emb")
-os.makedirs(output_dir, exist_ok=True)
-for i in range(num_batches):
-    start = i * batch_size
-    end = min((i + 1) * batch_size, num_nodes)
-    
-    batch_tensor = torch.tensor(emb_list[start:end], dtype=torch.float32, device=device)
-    batch_proj = proj(batch_tensor)
-    batch_proj_cpu = batch_proj.cpu().detach().numpy().tolist()
-    pl_chunk = pl.DataFrame({
-        "id": newpl["id"][start:end],
-        "topological_embedding": batch_proj_cpu
+def make_newpl():
+    # Step 2: Read new embedding file and format data type to match matrix pipeline
+    # 1. Load pickle file
+    with open("/projects/aixb/jchung/ROBOKOP/git/keep_all_nobert/xDTD_training_pipeline/data/text_embedding/embedding_biobert_namecat.pkl", "rb") as f:
+        data = pickle.load(f)  # data is a dict {id: list[f32]}
+
+    # 2. Convert dict to Polars DataFrame
+    newpl = pl.DataFrame({
+        "id": list(data.keys()),
+        "topological_embedding": list(data.values())
     })
-    pl_chunks.append(pl_chunk)
-    file_name = f"topo_embedding_512_batch_{i:04d}.parquet"
-    pl_chunk.write_parquet(os.path.join(output_dir, file_name), compression="snappy")
-    print(f"Batch {i:3d} saved to {file_name}")
-    #all_proj.append(batch_proj.cpu().detach().numpy())
+    proj = nn.Linear(100, 512).to(device)
 
-# Concatenate at the end (Polars is memory-efficient here)
-#newpl = pl.concat(pl_chunks)
-#newpl.write_parquet("topological_embeddings_512.parquet")
-print("Parquet file saved successfully.")
-newpl = newpl.lazy()
+    batch_size = 50000  # adjust based on your GPU memory
+    emb_list = newpl["topological_embedding"].to_list()
+    num_nodes = len(emb_list)
+    print(f"pkl has number of nodes:{num_nodes}")
+    num_batches = math.ceil(num_nodes / batch_size)
+
+
+    pl_chunks = []
+    
+    for i in range(num_batches):
+        start = i * batch_size
+        end = min((i + 1) * batch_size, num_nodes)
+        
+        batch_tensor = torch.tensor(emb_list[start:end], dtype=torch.float32, device=device)
+        batch_proj = proj(batch_tensor)
+        batch_proj_cpu = batch_proj.cpu().detach().numpy().tolist()
+        pl_chunk = pl.DataFrame({
+            "id": newpl["id"][start:end],
+            "topological_embedding": batch_proj_cpu
+        })
+        pl_chunks.append(pl_chunk)
+        file_name = f"topo_embedding_512_batch_{i:04d}.parquet"
+        pl_chunk.write_parquet(os.path.join(output_dir, file_name), compression="snappy")
+        print(f"Batch {i:3d} saved to {file_name}")
+        #all_proj.append(batch_proj.cpu().detach().numpy())
+
+    # Concatenate at the end (Polars is memory-efficient here)
+    newpl = pl.concat(pl_chunks)
+    #newpl.write_parquet("topological_embeddings_512.parquet")
+    print("Parquet file saved successfully.")
+    newpl = newpl.lazy()
+
+# make newpl from pkl to polars
+#newpl = make_newpl() # annotated to not repeat
+
+# read parquet newpl
+# biobert_emb output path
+input_dir = os.path.join(BASE_PATH, "biobert_emb")
+os.makedirs(input_dir, exist_ok=True)
+newpl = pl.scan_parquet(input_dir)
+# ========== section to annotate if want to make new parquet from pkl
+
 
 newpl_count = newpl.select(pl.len()).collect().row(0)[0]
 print("New emb is ready for merge and has number of rows:", newpl_count)
@@ -78,7 +91,7 @@ row_count = df.select(pl.len()).collect().row(0)[0]
 print("After join, df has number of rows", row_count)
 nullcheck = df.filter(pl.col("topological_embedding").is_null())
 print(nullcheck.collect())
-output_dir = os.path.join(BASE_PATH, "biobert_emb")
+output_dir = os.path.join(BASE_PATH, "biobert_emb_replace")
 os.makedirs(output_dir, exist_ok=True)
 
 # Split into 200 roughly equal partitions
