@@ -58,10 +58,12 @@ for i in range(num_batches):
 
 # Concatenate at the end (Polars is memory-efficient here)
 newpl = pl.concat(pl_chunks)
+newpl.write_parquet("topological_embeddings_512.parquet")
+print("Parquet file saved successfully.")
 newpl = newpl.lazy()
 
 newpl_count = newpl.select(pl.len()).collect().row(0)[0]
-print("New emb is ready for merge and has number of rows:", newpl_count.shape)
+print("New emb is ready for merge and has number of rows:", newpl_count)
 dupes = newpl.group_by("id").agg(pl.len().alias("count")).filter(pl.col("count")>1)
 print("Duplicate ids in new embedding", dupes.collect())
 
