@@ -9,7 +9,7 @@ import argparse
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(DEVICE)
-HIDDEN_DIM = 100
+HIDDEN_DIM = 50
 
 BASE_PATH = '/workspace/data/robokop/CCGGDD'
 MODEL_PATH = os.path.join(BASE_PATH, 'model_10.pt')
@@ -105,7 +105,7 @@ def main(args):
 
 
     # ---------- Run Predictions and Write Scores ----------
-    with torch.no_grad(), open(os.path.join(BASE_PATH, args.output), "w") as fout:
+    with torch.no_grad(), open(args.output, "w") as fout:
         for batch in dataloader:
             h, r, t = [x.to(DEVICE) for x in batch]
             scores = model(h, r, t)  # shape: [batch_size]
