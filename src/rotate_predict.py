@@ -114,7 +114,7 @@ def main(args):
             prob = sigmoid(scores)
             for s in prob.cpu().tolist():
                 fout.write(f"{s}\n")
-                
+            print(f"batch {batch:3d} done writing.")
 if __name__ == "__main__":
     
     argparser = argparse.ArgumentParser()
