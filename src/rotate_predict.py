@@ -85,16 +85,18 @@ def main(args):
     # ---------- Polars Lazy Loading and String-to-ID Mapping ----------
     test_path = args.input  # tab-separated file: head \t relation \t tail
 
-    lazy_df = pl.scan_csv(test_path, separator="\t", has_header=True)#.with_columns(
+    lazy_df = pl.scan_csv(test_path, separator="\t", has_header=True
+                          , new_columns=["head", "relation", "tail"]
+                          )#.with_columns(
         #pl.lit(70).alias("rel_id") # this is dynamic for each model trained. Need to parameterized this later!!
         #)#, new_columns=["head", "tail"])
 
 
 
     iddf = lazy_df.with_columns([
-        map_column_to_id("source", node_dict).alias("head_id"),
-        #map_column_to_id(pl.col("rel"), rel_dict).alias("rel_id"),
-        map_column_to_id("target", node_dict).alias("tail_id"),
+        map_column_to_id("head", node_dict).alias("head_id"),
+        map_column_to_id("relation", rel_dict).alias("rel_id"),
+        map_column_to_id("tail", node_dict).alias("tail_id"),
     ]).select(["head_id", "rel_id", "tail_id"])
 
 
