@@ -12,7 +12,7 @@ HIDDEN_DIM = 50
 PROJECTED_DIM = 512
 
 BASE_PATH = '/workspace/data/robokop/rCD'
-MODEL_PATH = os.path.join(BASE_PATH, 'model_10.pt')
+MODEL_PATH = os.path.join(BASE_PATH, 'model_300.pt')
 ENTITY_OUTPUT_TSV = os.path.join(BASE_PATH, 'projected_entity_embeddings.tsv')
 
 NODE_DICT_PATH = os.path.join(BASE_PATH, 'processed', 'node_dict')
