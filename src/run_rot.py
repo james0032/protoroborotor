@@ -42,7 +42,7 @@ def main(args):
         num_nodes=train_data.num_nodes,
         num_relations=train_data.num_edge_types,
         
-        hidden_channels=100,
+        hidden_channels=50,
         **model_arg_map.get(args.model, {}),
     ).to(device)
     print("Start data loader")

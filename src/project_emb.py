@@ -8,7 +8,7 @@ import argparse
 # === Config ===
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-HIDDEN_DIM = 100
+HIDDEN_DIM = 50
 PROJECTED_DIM = 512
 
 BASE_PATH = '/workspace/data/robokop/rCD'
@@ -37,9 +37,9 @@ def load_trained_model(path: str, num_nodes: int, num_relations: int) -> RotatE:
         num_nodes=num_nodes,
         num_relations=num_relations,
         hidden_channels=HIDDEN_DIM,
-    ).to(DEVICE)
+    ).to("cpu")
 
-    checkpoint = torch.load(path, map_location=DEVICE)
+    checkpoint = torch.load(path, map_location="cpu")
     print("Checkpoint keys:", checkpoint.keys())
     # If your checkpoint has nested keys like "model_state_dict", extract them
     if 'model_state_dict' in checkpoint:
@@ -48,6 +48,7 @@ def load_trained_model(path: str, num_nodes: int, num_relations: int) -> RotatE:
         state_dict = checkpoint  # fallback if it's already flat
     print("state_dict keys:", state_dict.keys())
     model.load_state_dict(state_dict)
+    model.to(DEVICE)
     model.eval()
     return model
 
