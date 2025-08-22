@@ -137,10 +137,10 @@ def keep_CGGD(edge, typemap):
 
 def pred_trans(edge, edge_map):
     edge_key = {"predicate": edge["predicate"]}
-    #edge_key["subject_aspect_qualifier"] = edge.get("subject_aspect_qualifier", "")
-    #edge_key["object_aspect_qualifier"] = edge.get("object_aspect_qualifier", "")
-    #edge_key["subject_direction_qualifier"] = edge.get("subject_direction_qualifier", "")
-    #edge_key["object_direction_qualifier"] = edge.get("object_direction_qualifier", "")
+    edge_key["subject_aspect_qualifier"] = edge.get("subject_aspect_qualifier", "")
+    edge_key["object_aspect_qualifier"] = edge.get("object_aspect_qualifier", "")
+    edge_key["subject_direction_qualifier"] = edge.get("subject_direction_qualifier", "")
+    edge_key["object_direction_qualifier"] = edge.get("object_direction_qualifier", "")
     edge_key_string = json.dumps(edge_key, sort_keys=True)
     if edge_key_string not in edge_map:
         edge_map[edge_key_string] = f"predicate:{len(edge_map)}"
