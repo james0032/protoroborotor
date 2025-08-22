@@ -3,6 +3,7 @@ import torch.nn as nn
 import csv
 import os
 from torch_geometric.nn import RotatE
+import argparse
 
 # === Config ===
 
@@ -113,4 +114,7 @@ def main():
 
 
 if __name__ == "__main__":
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument('--dataset', type=str, required=True)
+    
     main()

@@ -7,9 +7,9 @@ tqdm.pandas()
 import os
 
 BASE_PATH = "/workspace/data/robokop/rCD"
-
-# Step 1: Read both old and new emb files
-df = pl.scan_parquet("gs://mtrx-us-central1-hub-dev-storage/data/01_RAW/modeling/UNC10/rotatE_on_KG2/rotate_emb_match_feat3/")
+DIM = 512
+# Step 1: Read both old emb files
+df = pl.scan_parquet("gs://mtrx-us-central1-hub-dev-storage/kedro/data/tests/emb_replace_robokop/datasets/embeddings/feat/nodes_with_embeddings/")
 #print("Begining size of nodes with embeddings", df.shape)
 df = df.with_columns(pl.col("id").cast(pl.Utf8).str.strip_chars('"'))
 row_count = df.select(pl.len()).collect().row(0)[0]
@@ -41,8 +41,40 @@ df = df.join(newpl, on="id", how="left")
 #print("Final size of nodes with embeddings", df.shape)
 row_count = df.select(pl.len()).collect().row(0)[0]
 print("After join, df has number of rows", row_count)
+
+# Step 4: collect IDs with null embeddings
+null_ids = (
+    df.filter(pl.col("topological_embedding").is_null())
+           .select("id")
+           .collect()["id"].to_list()
+)
+print(f"There are {len(null_ids)} nodes has no embeddings from projected_entity_embeddings.tsv")
+
+
+# Step 5: make random vectors for those IDs
+np.random.seed(42)
+rand_vectors = [np.random.rand(DIM).astype(np.float64).tolist() for _ in null_ids]
+
+rand_df = pl.DataFrame({
+    "id": null_ids,
+    "topological_embedding": rand_vectors
+})
+# Step 6: join back
+df = (
+    df.join(rand_df.lazy(), on="id", how="left", suffix="_rand")
+           .with_columns(
+               pl.when(pl.col("topological_embedding").is_null())
+                 .then(pl.col("topological_embedding_rand"))
+                 .otherwise(pl.col("topological_embedding"))
+                 .alias("topological_embedding")
+           )
+           .drop(["topological_embedding_rand"])
+)
+
+# Step 7: Check again if there is any null embeddings in topological_embedding column
 nullcheck = df.filter(pl.col("topological_embedding").is_null())
 print(nullcheck.collect())
+
 output_dir = os.path.join(BASE_PATH, "rotate_emb")
 os.makedirs(output_dir, exist_ok=True)
 
