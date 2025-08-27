@@ -79,7 +79,7 @@ df = (
 
 # Step 7: Check again if there is any null embeddings in topological_embedding column
 nullcheck = df.filter(pl.col("topological_embedding").is_null())
-print(f"Check number of rows when topological_embedding value is null:" nullcheck.collect())
+print(f"Check number of rows when topological_embedding value is null:", nullcheck.collect())
 
 output_dir = os.path.join(BASE_PATH, "combine_emb")
 os.makedirs(output_dir, exist_ok=True)
