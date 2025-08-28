@@ -20,7 +20,7 @@ print("df has number of rows", row_count)
 
 # Step 2: collect all IDs 
 all_ids = (
-    df.select("topological_embedding")   # pick the column
+    df.select("id")   # pick the column
       .collect()                         # trigger execution
       .to_series()                       # convert to Series
       .to_list()                         # finally Python list
@@ -51,7 +51,7 @@ for i in range(0, N, BATCH):
         "id": batch_ids,
         "topological_embedding": batch_vecs_list
     })
-    batch_df = batch_df.with_columns(pl.col("id").cast(pl.Utf8))
+    #batch_df = batch_df.with_columns(pl.col("id").cast(pl.Utf8))
     batch_df.write_parquet(f"{output_dir}/rand_vectors_{i:3d}.parquet")
     #dfs.append(batch_df)
     print(f"batch {i} done.")
