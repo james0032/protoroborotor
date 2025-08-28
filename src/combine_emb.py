@@ -7,7 +7,7 @@ tqdm.pandas()
 import os
 
 BASE_PATH = "/workspace/data/robokop/rCD_robokop_emb_predicate_only"
-DIM = 512
+DIM = 256
 # Step 1: Read both old emb files
 df = pl.scan_parquet("gs://mtrx-us-central1-hub-dev-storage/data/01_RAW/modeling/UNC10/emb_replace_robokop_n2v_256/all.nodes.emb.snappy.parquet")
 #print("Begining size of nodes with embeddings", df.shape)
