@@ -37,10 +37,10 @@ BATCH = 100_000
 dfs = []
 for i in range(0, N, BATCH):
     batch_ids = all_ids[i:i+BATCH]
-    batch_vecs = torch.rand((len(batch_ids), DIM), dtype=torch.float32)
+    batch_vecs = torch.rand((len(batch_ids), DIM), dtype=torch.float32, device="cuda")
     
     # convert this batch to list-of-lists
-    batch_vecs_list = batch_vecs.tolist()
+    batch_vecs_list = batch_vecs.to("cpu").tolist()
     
     # make Polars batch dataframe
     batch_df = pl.DataFrame({
