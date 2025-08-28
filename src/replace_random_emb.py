@@ -32,36 +32,41 @@ print(f"There are {len(all_ids)} nodes has no embeddings from projected_entity_e
 # Step 5: make random vectors for those IDs
 np.random.seed(42)
 N = len(all_ids)
-BATCH = 100_000
+BATCH = 500000
 
 dfs = []
-for i in range(0, N, BATCH):
-    batch_ids = all_ids[i:i+BATCH]
-    batch_vecs = torch.rand((len(batch_ids), DIM), dtype=torch.float32, device="cuda")
-    
-    # convert this batch to list-of-lists
-    batch_vecs_list = batch_vecs.to("cpu").tolist()
-    
-    # make Polars batch dataframe
-    batch_df = pl.DataFrame({
-        "id": batch_ids,
-        "topological_embedding": batch_vecs_list
-    })
-    dfs.append(batch_df)
-    print(f"batch {i} done.")
 
-rand_df = pl.concat(dfs, how="vertical")
+output_dir = os.path.join(BASE_PATH, "random_emb")
+os.makedirs(output_dir, exist_ok=True)
 
+with pl.DataFrame([]).write_parquet(f"{output_dir}/all.snappy.parquet", mode="wb") as writer:
+    for i in range(0, N, BATCH):
+        batch_ids = all_ids[i:i+BATCH]
+        batch_vecs = torch.rand((len(batch_ids), DIM), dtype=torch.float32, device="cuda")
+        
+        # convert this batch to list-of-lists
+        batch_vecs_list = batch_vecs.to("cpu").tolist()
+        
+        # make Polars batch dataframe
+        batch_df = pl.DataFrame({
+            "id": batch_ids,
+            "topological_embedding": batch_vecs_list
+        })
+        batch_df.write_parquet(writer, mode="append")
+        #dfs.append(batch_df)
+        print(f"batch {i} done.")
+
+#rand_df = pl.concat(dfs, how="vertical")
+dfran = pl.scan_parquet(f"{output_dir}/all.snappy.parquet")
 # Step 6: join back
 df.drop(["topological_embedding"])
-df = df.join(rand_df.lazy(), on="id", how="left")
+df = df.join(dfran, on="id", how="left")
 print("Merge completed.")
 # Step 7: Check again if there is any null embeddings in topological_embedding column
 nullcheck = df.filter(pl.col("topological_embedding").is_null())
 print(nullcheck.collect())
 
-output_dir = os.path.join(BASE_PATH, "random_emb")
-os.makedirs(output_dir, exist_ok=True)
+
 
 # Split into 200 roughly equal partitions
 num_partitions = 200
