@@ -5,6 +5,7 @@ import numpy as np
 from tqdm import tqdm
 tqdm.pandas()
 import os
+import torch
 
 BASE_PATH = "/workspace/data/robokop/rCD_robokop_emb_predicate_only"
 DIM = 512
@@ -30,11 +31,14 @@ print(f"There are {len(all_ids)} nodes has no embeddings from projected_entity_e
 
 # Step 5: make random vectors for those IDs
 np.random.seed(42)
-rand_vectors = [np.random.rand(DIM).astype(np.float64).tolist() for _ in all_ids]
+N = len(all_ids)
+rand_vectors = torch.rand((N, DIM), dtype=torch.float32)
+# convert to list-of-lists
+rand_vectors_list = rand_vectors.tolist()
 
 rand_df = pl.DataFrame({
     "id": all_ids,
-    "topological_embedding": rand_vectors
+    "topological_embedding": rand_vectors_list
 })
 # Step 6: join back
 df.drop(["topological_embedding"])
