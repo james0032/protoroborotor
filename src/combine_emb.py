@@ -9,7 +9,7 @@ import os
 BASE_PATH = "/workspace/data/robokop/rCD_robokop_emb_predicate_only"
 DIM = 512
 # Step 1: Read both old emb files
-df = pl.scan_parquet("gs://mtrx-us-central1-hub-dev-storage/kedro/data/tests/emb_replace_robokop/datasets/embeddings/feat/nodes_with_embeddings/")
+df = pl.scan_parquet("gs://mtrx-us-central1-hub-dev-storage/data/01_RAW/modeling/UNC10/emb_replace_robokop_n2v_256/all.nodes.emb.snappy.parquet")
 #print("Begining size of nodes with embeddings", df.shape)
 df = df.with_columns(pl.col("id").cast(pl.Utf8).str.strip_chars('"'))
 row_count = df.select(pl.len()).collect().row(0)[0]
