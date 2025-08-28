@@ -50,4 +50,4 @@ df = pl.concat(result_batches)
 # --- 5. Replace old embedding if desired ---
 df = df.drop("topological_embedding").rename({"embedding_proj": "topological_embedding"})
 
-df.write_parquet("/workspace/data/robokop/all.nodes.emb.snappy.parquet", separator='\t')
+df.write_parquet("/workspace/data/robokop/all.nodes.emb.snappy.parquet", compression="snappy")
