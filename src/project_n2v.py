@@ -31,7 +31,7 @@ result_batches = []
 
 for df_batch in df.collect().iter_slices(n_rows=BATCH_SIZE):
     # Convert list column -> torch tensor
-    x = torch.tensor(df_batch["topological_embedding"].to_list(), dtype=torch.float32)  # (B, 512)
+    x = torch.tensor(df_batch["topological_embedding"].to_list(), dtype=torch.float32).to(DEVICE)  # (B, 512)
 
     # Project with torch
     with torch.no_grad():
