@@ -52,6 +52,7 @@ with pl.DataFrame([]).write_parquet(f"{output_dir}/all.snappy.parquet", mode="wb
             "id": batch_ids,
             "topological_embedding": batch_vecs_list
         })
+        batch_df = batch_df.with_columns(pl.col("id").cast(pl.Utf8))
         batch_df.write_parquet(writer, mode="append")
         #dfs.append(batch_df)
         print(f"batch {i} done.")
