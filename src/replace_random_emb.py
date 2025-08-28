@@ -39,26 +39,25 @@ dfs = []
 output_dir = os.path.join(BASE_PATH, "random_emb")
 os.makedirs(output_dir, exist_ok=True)
 
-with pl.DataFrame([]).write_parquet(f"{output_dir}/all.snappy.parquet", mode="wb") as writer:
-    for i in range(0, N, BATCH):
-        batch_ids = all_ids[i:i+BATCH]
-        batch_vecs = torch.rand((len(batch_ids), DIM), dtype=torch.float32, device="cuda")
-        
-        # convert this batch to list-of-lists
-        batch_vecs_list = batch_vecs.to("cpu").tolist()
-        
-        # make Polars batch dataframe
-        batch_df = pl.DataFrame({
-            "id": batch_ids,
-            "topological_embedding": batch_vecs_list
-        })
-        batch_df = batch_df.with_columns(pl.col("id").cast(pl.Utf8))
-        batch_df.write_parquet(writer, mode="append")
-        #dfs.append(batch_df)
-        print(f"batch {i} done.")
+for i in range(0, N, BATCH):
+    batch_ids = all_ids[i:i+BATCH]
+    batch_vecs = torch.rand((len(batch_ids), DIM), dtype=torch.float32, device="cuda")
+    
+    # convert this batch to list-of-lists
+    batch_vecs_list = batch_vecs.to("cpu").tolist()
+    
+    # make Polars batch dataframe
+    batch_df = pl.DataFrame({
+        "id": batch_ids,
+        "topological_embedding": batch_vecs_list
+    })
+    batch_df = batch_df.with_columns(pl.col("id").cast(pl.Utf8))
+    batch_df.write_parquet(f"{output_dir}/rand_vectors_{i:3d}.parquet")
+    #dfs.append(batch_df)
+    print(f"batch {i} done.")
 
 #rand_df = pl.concat(dfs, how="vertical")
-dfran = pl.scan_parquet(f"{output_dir}/all.snappy.parquet")
+dfran = pl.scan_parquet(f"{output_dir}/")
 # Step 6: join back
 df.drop(["topological_embedding"])
 df = df.join(dfran, on="id", how="left")
