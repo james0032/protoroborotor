@@ -18,7 +18,12 @@ print("df has number of rows", row_count)
 #print("Duplicated id in matrix pipeline generated embedding file", dupes.collect())
 
 # Step 2: collect all IDs 
-all_ids = df["topological_embedding"].to_list()
+all_ids = (
+    df.select("topological_embedding")   # pick the column
+      .collect()                         # trigger execution
+      .to_series()                       # convert to Series
+      .to_list()                         # finally Python list
+)
 
 print(f"There are {len(all_ids)} nodes has no embeddings from projected_entity_embeddings.tsv")
 
