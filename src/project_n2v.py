@@ -35,7 +35,7 @@ for df_batch in df.collect().iter_slices(n_rows=BATCH_SIZE):
 
     # Project with torch
     with torch.no_grad():
-        y = project(x).numpy().tolist()  # list[list[float]] shape (B, 256)
+        y = project(x).to("cpu").numpy().tolist()  # list[list[float]] shape (B, 256)
 
     # Insert back into Polars as list[f32]
     df_batch = df_batch.with_columns(
@@ -50,4 +50,4 @@ df = pl.concat(result_batches)
 # --- 5. Replace old embedding if desired ---
 df = df.drop("topological_embedding").rename({"embedding_proj": "topological_embedding"})
 
-df.write_csv("/workspace/data/robokop/all.nodes.emb.snappy.parquet", separator='\t')
+df.write_parquet("/workspace/data/robokop/all.nodes.emb.snappy.parquet", separator='\t')
