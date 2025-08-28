@@ -48,13 +48,14 @@ for i in range(0, N, BATCH):
         "topological_embedding": batch_vecs_list
     })
     dfs.append(batch_df)
+    print(f"batch {i} done.")
 
 rand_df = pl.concat(dfs, how="vertical")
 
 # Step 6: join back
 df.drop(["topological_embedding"])
 df = df.join(rand_df.lazy(), on="id", how="left")
-
+print("Merge completed.")
 # Step 7: Check again if there is any null embeddings in topological_embedding column
 nullcheck = df.filter(pl.col("topological_embedding").is_null())
 print(nullcheck.collect())
