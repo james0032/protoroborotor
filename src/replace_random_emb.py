@@ -32,14 +32,25 @@ print(f"There are {len(all_ids)} nodes has no embeddings from projected_entity_e
 # Step 5: make random vectors for those IDs
 np.random.seed(42)
 N = len(all_ids)
-rand_vectors = torch.rand((N, DIM), dtype=torch.float32)
-# convert to list-of-lists
-rand_vectors_list = rand_vectors.tolist()
+BATCH = 100_000
 
-rand_df = pl.DataFrame({
-    "id": all_ids,
-    "topological_embedding": rand_vectors_list
-})
+dfs = []
+for i in range(0, N, BATCH):
+    batch_ids = all_ids[i:i+BATCH]
+    batch_vecs = torch.rand((len(batch_ids), DIM), dtype=torch.float32)
+    
+    # convert this batch to list-of-lists
+    batch_vecs_list = batch_vecs.tolist()
+    
+    # make Polars batch dataframe
+    batch_df = pl.DataFrame({
+        "id": batch_ids,
+        "topological_embedding": batch_vecs_list
+    })
+    dfs.append(batch_df)
+
+rand_df = pl.concat(dfs, how="vertical")
+
 # Step 6: join back
 df.drop(["topological_embedding"])
 df = df.join(rand_df.lazy(), on="id", how="left")
