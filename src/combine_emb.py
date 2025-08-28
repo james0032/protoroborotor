@@ -18,7 +18,7 @@ print("df has number of rows", row_count)
 #print("Duplicated id in matrix pipeline generated embedding file", dupes.collect())
 
 # Step 2: Read new embedding file and format data type to match matrix pipeline
-newpl = pl.scan_csv(os.path.join(BASE_PATH, "projected_entity_embeddings.tsv"), separator='\t', has_header=False)
+newpl = pl.scan_csv(os.path.join(BASE_PATH, "projected_entity_embeddings_256.tsv"), separator='\t', has_header=False)
 schema = newpl.collect_schema()
 col_names = schema.names()
 
@@ -88,7 +88,7 @@ os.makedirs(output_dir, exist_ok=True)
 num_partitions = 200
 
 partition_size = (row_count // num_partitions) + 1
-df.sink_parquet(f"{output_dir}/n2v_rotate.combine.snappy.parquet", compression="snappy")
+df.sink_parquet(f"{output_dir}/n2v_rotate.512.combine.snappy.parquet", compression="snappy")
 #for i in range(num_partitions):
 #    start = i * partition_size
 #    length = min(partition_size, row_count-start)
