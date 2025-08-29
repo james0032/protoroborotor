@@ -11,9 +11,9 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 HIDDEN_DIM = 50
 PROJECTED_DIM = 256
 
-BASE_PATH = '/workspace/data/robokop/rCD_robokop_emb_predicate_only'
+BASE_PATH = '/workspace/data/robokop/keepall'
 MODEL_PATH = os.path.join(BASE_PATH, 'model_300.pt')
-ENTITY_OUTPUT_TSV = os.path.join(BASE_PATH, 'projected_entity_embeddings_256.tsv')
+ENTITY_OUTPUT_TSV = os.path.join(BASE_PATH, 'projected_entity_embeddings.tsv')
 
 NODE_DICT_PATH = os.path.join(BASE_PATH, 'processed', 'node_dict')
 REL_DICT_PATH = os.path.join(BASE_PATH, 'processed', 'rel_dict')

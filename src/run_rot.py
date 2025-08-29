@@ -98,12 +98,14 @@ def main(args):
             rank, mrr, hits = test(val_data, model)
             print(f'Epoch: {epoch:03d}, Val Mean Rank: {rank:.2f}, '
                 f'Val MRR: {mrr:.4f}, Val Hits@10: {hits:.4f}')
-
-    print("One last test")
-    rank, mrr, hits_at_10 = test(test_data, model)
-    print(f'Test Mean Rank: {rank:.2f}, Test MRR: {mrr:.4f}, '
-        f'Test Hits@10: {hits_at_10:.4f}')
-
+    if args.testmode != "notest":
+        print("One last test")
+        rank, mrr, hits_at_10 = test(test_data, model)
+        print(f'Test Mean Rank: {rank:.2f}, Test MRR: {mrr:.4f}, '
+            f'Test Hits@10: {hits_at_10:.4f}')
+    else:
+        print("Modelling done.")
+        
 def train(model, loader, optimizer):
     model.train()
     total_loss = total_examples = 0
@@ -139,6 +141,7 @@ if __name__ == "__main__":
     argparser.add_argument('--epochs', type=int, default=1000)
     argparser.add_argument('--testrate', type=int, default=100)
     argparser.add_argument('--saverate', type=int, default=100)
+    argparser.add_argument('--testmode', type=str, default="notest")
     # Flag to indicate whether to resume training
     argparser.add_argument('--keeptrain', action='store_true', help='Resume training from a saved checkpoint.')
 

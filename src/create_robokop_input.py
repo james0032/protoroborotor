@@ -42,6 +42,9 @@ def remove_CD(edge, typemap):
               ]
     return check_remove(edge, typemap, remove)
 
+def dont_remove(edge, typemap):
+    return False
+
 def keep_CD(edge, typemap):
     # return True if you want to filter this edge out
     # We want to keep edges between chemicals and genes, between genes and disease, and between chemicals and diseases
@@ -197,6 +200,9 @@ def create_robokop_input(node_file="robokop/nodes.jsonl", edges_file="robokop/ed
         remove_edge = keep_CCDD
     elif style == "rCD":
         remove_edge = remove_CD
+    elif style == "keepall":
+        remove_edge = dont_remove    
+    
     else:
         print("I don't know what you mean")
         return
@@ -218,7 +224,7 @@ def create_robokop_input(node_file="robokop/nodes.jsonl", edges_file="robokop/ed
 if __name__ == "__main__":
     #create_robokop_input(style="CCGDD")
     #create_robokop_input(style="CCGGDD")
-    create_robokop_input(style="rCD")
+    create_robokop_input(style="keepall")
     print("subgraph keep all except drug to disease relationships created.")
     #create_robokop_input(style="CGGD")
     #create_robokop_input(style="CCD")
