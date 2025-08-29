@@ -9,7 +9,7 @@ import argparse
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 HIDDEN_DIM = 50
-PROJECTED_DIM = 256
+PROJECTED_DIM = 512
 
 BASE_PATH = '/workspace/data/robokop/keepall'
 MODEL_PATH = os.path.join(BASE_PATH, 'model_300.pt')

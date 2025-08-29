@@ -72,7 +72,9 @@ print(nullcheck.collect())
 num_partitions = 200
 
 partition_size = (row_count // num_partitions) + 1
-df.sink_parquet(f"{output_dir}/all.snappy.parquet", compression="snappy")
+ready_dir = os.path.join(BASE_PATH, "random_emb_1file")
+os.makedirs(ready_dir, exist_ok=True)
+df.sink_parquet(f"{ready_dir}/all.snappy.parquet", compression="snappy")
 #for i in range(num_partitions):
 #    start = i * partition_size
 #    length = min(partition_size, row_count-start)
