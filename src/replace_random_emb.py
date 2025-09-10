@@ -44,14 +44,14 @@ for i in range(0, N, BATCH):
     batch_vecs = torch.rand((len(batch_ids), DIM), dtype=torch.float32, device="cuda")
     
     # convert this batch to list-of-lists
-    batch_vecs_list = batch_vecs.to("cpu").tolist()
+    batch_vecs_list = batch_vecs.to("cpu").numpy().astype("float32").tolist()
     
     # make Polars batch dataframe
     batch_df = pl.DataFrame({
         "id": batch_ids,
         "topological_embedding": batch_vecs_list
     })
-    #batch_df = batch_df.with_columns(pl.col("id").cast(pl.Utf8))
+    batch_df = batch_df.with_columns(pl.col("topological_embedding").cast(pl.List(pl.Float32)))
     batch_df.write_parquet(f"{output_dir}/rand_vectors_{i:3d}.parquet")
     #dfs.append(batch_df)
     print(f"batch {i} done.")
