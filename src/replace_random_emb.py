@@ -44,7 +44,7 @@ for i in range(0, N, BATCH):
     batch_vecs = torch.rand((len(batch_ids), DIM), dtype=torch.float32, device="cuda")
     
     # convert this batch to list-of-lists
-    batch_vecs_list = batch_vecs.to("cpu").numpy().astype("float32").tolist()
+    batch_vecs_list = batch_vecs.to("cpu").numpy().round(3).astype("float32").tolist()
     
     # make Polars batch dataframe
     batch_df = pl.DataFrame({
