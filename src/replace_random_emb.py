@@ -59,7 +59,7 @@ for i in range(0, N, BATCH):
 #rand_df = pl.concat(dfs, how="vertical")
 dfran = pl.scan_parquet(f"{output_dir}/")
 # Step 6: join back
-df.drop(["topological_embedding"])
+df = df.drop(["topological_embedding"])
 df = df.join(dfran, on="id", how="left")
 print("Merge completed.")
 # Step 7: Check again if there is any null embeddings in topological_embedding column
