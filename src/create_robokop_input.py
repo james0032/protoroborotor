@@ -137,6 +137,17 @@ def keep_CGGD(edge, typemap):
                 ("biolink:Gene", "biolink:DiseaseOrPhenotypicFeature")]
     return check_accepted(edge, typemap, accepted)
 
+def keep_CGGD_alltreat(edge, typemap):
+    # return True if you want to filter this edge out
+    # We want to keep edges between chemicals and genes, between genes and disease, and between chemicals and diseases
+    # Unfortunately this means that we need a type map... Dangit
+    if edge["predicate"] == "biolink:treats":
+        return False
+    accepted = [ ("biolink:ChemicalEntity", "biolink:DiseaseOrPhenotypicFeature"),
+                ("biolink:ChemicalEntity", "biolink:GeneOrGeneProduct"),
+                ("biolink:GeneOrGeneProduct", "biolink:GeneOrGeneProduct"),
+                ("biolink:GeneOrGeneProduct", "biolink:DiseaseOrPhenotypicFeature")]
+    return check_accepted(edge, typemap, accepted)
 
 def pred_trans(edge, edge_map):
     edge_key = {"predicate": edge["predicate"]}
@@ -226,9 +237,10 @@ def create_robokop_input(node_file="robokop/nodes.jsonl", edges_file="robokop/ed
 if __name__ == "__main__":
     #create_robokop_input(style="CCGDD")
     #create_robokop_input(style="CCGGDD")
-    create_robokop_input(style="keepall")
-    print("subgraph keep all except drug to disease relationships created.")
+    #create_robokop_input(style="keepall")
+    #print("subgraph keep all except drug to disease relationships created.")
     #create_robokop_input(style="CGGD")
+    print("subgraph CGGD with all subclass_of edges and treat edges were generated.")
     #create_robokop_input(style="CCD")
     #print("CCD created.")
     #create_robokop_input(style="CD")
