@@ -241,7 +241,7 @@ if __name__ == "__main__":
     #create_robokop_input(style="CCGGDD")
     #create_robokop_input(style="keepall")
     #print("subgraph keep all except drug to disease relationships created.")
-    #create_robokop_input(style="CGGD")
+    create_robokop_input(style="CGGD_alltreat")
     print("subgraph CGGD with all subclass_of edges and treat edges were generated.")
     #create_robokop_input(style="CCD")
     #print("CCD created.")
