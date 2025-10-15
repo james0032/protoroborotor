@@ -214,7 +214,9 @@ def create_robokop_input(node_file="robokop/nodes.jsonl", edges_file="robokop/ed
         remove_edge = remove_CD
     elif style == "keepall":
         remove_edge = dont_remove    
-    
+    elif style == "CGGD_alltreat":
+        remove_edge = keep_CGGD_alltreat  
+        
     else:
         print("I don't know what you mean")
         return
